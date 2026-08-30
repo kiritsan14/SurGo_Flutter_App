@@ -1,0 +1,127 @@
+{
+  "passenger": {
+    "id": "PSG-10234",
+    "name": "Marisol Cruz",
+    "firstName": "Marisol",
+    "initials": "MC",
+    "phone": "+63 917 512 4809",
+    "email": "marisol.cruz@email.com",
+    "rating": 4.9,
+    "totalRides": 128,
+    "memberSince": 2024,
+    "verified": true
+  },
+  "rider": {
+    "id": "FFI03892",
+    "name": "Rahel Santos",
+    "initials": "RS",
+    "phone": "+63 918 220 4471",
+    "email": "rahel.santos@email.com",
+    "rating": 4.95,
+    "totalTrips": 1240,
+    "memberSince": 2023,
+    "verified": true,
+    "vehicleType": "Tricycle",
+    "vehicleModel": "Kawasaki HD 175",
+    "vehiclePlate": "NGD 4821",
+    "documentsStatus": "Verified"
+  },
+  "notifications": {
+    "passenger": [
+      { "id": "n1", "type": "promo", "title": "₱30 off your next 3 rides", "body": "Use code SURGO30 before it expires.", "time": "2 min ago", "read": false },
+      { "id": "n2", "type": "ride", "title": "Trip completed", "body": "Your trip with Junel Ramos has ended. Rate your experience.", "time": "1 hr ago", "read": false },
+      { "id": "n3", "type": "payment", "title": "Payment received", "body": "₱65 was deducted for your Poblacion → SM Terminal ride.", "time": "Yesterday", "read": true },
+      { "id": "n4", "type": "system", "title": "Welcome to SurGo", "body": "Thanks for joining! Complete your profile to get started.", "time": "3 days ago", "read": true },
+      { "id": "n5", "type": "safety", "title": "Safety tip", "body": "Always confirm the plate number before boarding.", "time": "5 days ago", "read": true }
+    ],
+    "rider": [
+      { "id": "rn1", "type": "ride", "title": "New ride request nearby", "body": "A passenger 3.1 km away is looking for a tricycle.", "time": "5 min ago", "read": false },
+      { "id": "rn2", "type": "payment", "title": "Payout sent", "body": "₱1,850 was sent to your GCash account.", "time": "3 hr ago", "read": false },
+      { "id": "rn3", "type": "system", "title": "Document reminder", "body": "Your OR/CR will expire in 30 days. Please renew and re-upload.", "time": "1 day ago", "read": true },
+      { "id": "rn4", "type": "rating", "title": "New 5-star rating", "body": "Grace rated your trip 5 stars: \"Sobrang bait, ligtas magmaneho!\"", "time": "2 days ago", "read": true }
+    ]
+  },
+  "wallet": {
+    "passenger": {
+      "balance": 850,
+      "transactions": [
+        { "id": "wt1", "type": "debit", "title": "Ride · Poblacion → SM Terminal", "amount": 65, "date": "Aug 28, 2026", "status": "Completed" },
+        { "id": "wt2", "type": "topup", "title": "Wallet Top-up via GCash", "amount": 500, "date": "Aug 26, 2026", "status": "Completed" },
+        { "id": "wt3", "type": "debit", "title": "Ride · Purok 5 → Barangay Hall", "amount": 30, "date": "Aug 24, 2026", "status": "Completed" },
+        { "id": "wt4", "type": "debit", "title": "Rental deposit · Honda Click 125", "amount": 300, "date": "Aug 20, 2026", "status": "Refunded" },
+        { "id": "wt5", "type": "topup", "title": "Wallet Top-up via Maya", "amount": 300, "date": "Aug 15, 2026", "status": "Completed" }
+      ]
+    },
+    "rider": {
+      "balance": 3120,
+      "transactions": [
+        { "id": "rwt1", "type": "credit", "title": "Trip earnings · Grace", "amount": 55, "date": "Aug 29, 2026", "status": "Completed" },
+        { "id": "rwt2", "type": "credit", "title": "Trip earnings · Alex", "amount": 180, "date": "Aug 29, 2026", "status": "Completed" },
+        { "id": "rwt3", "type": "payout", "title": "Payout to GCash", "amount": 1850, "date": "Aug 27, 2026", "status": "Completed" },
+        { "id": "rwt4", "type": "credit", "title": "Trip earnings · Nena V.", "amount": 90, "date": "Aug 26, 2026", "status": "Completed" }
+      ]
+    }
+  },
+  "paymentMethods": [
+    { "id": "pm1", "type": "cash", "label": "Cash", "detail": "Pay the rider directly", "isDefault": false },
+    { "id": "pm2", "type": "gcash", "label": "GCash", "detail": "•••• 4809 · Marisol C.", "isDefault": true },
+    { "id": "pm3", "type": "maya", "label": "Maya", "detail": "•••• 2217 · Marisol C.", "isDefault": false }
+  ],
+  "savedPlaces": [
+    { "id": "sp1", "label": "Home", "address": "Purok 3, Barangay Poblacion, Tandag City", "icon": "home" },
+    { "id": "sp2", "label": "Work", "address": "SurGo Terminal, Downtown, Tandag City", "icon": "work" },
+    { "id": "sp3", "label": "Mama's House", "address": "Purok 5, Barangay San Isidro", "icon": "place" }
+  ],
+  "favorites": {
+    "riders": [
+      { "id": "fr1", "name": "Junel Ramos", "initials": "JR", "rating": 4.9, "trips": 1240, "vehicleType": "Tricycle", "plate": "NGD 4821" },
+      { "id": "fr2", "name": "Bebot Lim", "initials": "BL", "rating": 4.8, "trips": 860, "vehicleType": "Motorcycle", "plate": "JKC 9021" }
+    ],
+    "vehicles": [
+      { "id": "fv1", "name": "Honda Click 125", "type": "Motorcycle", "pricePerDay": 350, "ownerName": "Alex Tan" }
+    ]
+  },
+  "emergencyContacts": [
+    { "id": "ec1", "name": "Rosalinda Cruz", "relation": "Mother", "phone": "+63 917 220 1183" },
+    { "id": "ec2", "name": "Danilo Cruz", "relation": "Father", "phone": "+63 918 440 7762" }
+  ],
+  "rideHistory": [
+    { "id": "rh1", "route": "Poblacion → SM Terminal", "date": "Aug 28, 2026 · 6:40 PM", "fare": 65, "status": "Completed", "vehicleType": "Tricycle", "driverName": "Junel Ramos", "rating": 5 },
+    { "id": "rh2", "route": "Purok 5 → Barangay Hall", "date": "Aug 24, 2026 · 8:12 AM", "fare": 30, "status": "Completed", "vehicleType": "Motorcycle", "driverName": "Bebot Lim", "rating": 4 },
+    { "id": "rh3", "route": "Downtown → Public Market", "date": "Aug 19, 2026 · 5:05 PM", "fare": 45, "status": "Completed", "vehicleType": "Tricycle", "driverName": "Junel Ramos", "rating": 5 },
+    { "id": "rh4", "route": "SM Terminal → Poblacion", "date": "Aug 12, 2026 · 9:30 AM", "fare": 60, "status": "Cancelled", "vehicleType": "Tricycle", "driverName": "—", "rating": 0 }
+  ],
+  "rentalHistory": [
+    { "id": "rnh1", "vehicleName": "Honda Click 125", "ownerName": "Alex Tan", "startDate": "Aug 20, 2026", "endDate": "Aug 21, 2026", "totalFare": 700, "status": "Completed" },
+    { "id": "rnh2", "vehicleName": "Suzuki Multicab", "ownerName": "Rico D.", "startDate": "Jul 30, 2026", "endDate": "Aug 1, 2026", "totalFare": 1800, "status": "Completed" }
+  ],
+  "riderTrips": [
+    { "id": "rt1", "passengerName": "Grace", "route": "Purok 3 → Public Market", "date": "Aug 29, 2026 · 7:40 AM", "fare": 55, "distanceKm": 3.1, "status": "Completed", "rating": 5 },
+    { "id": "rt2", "passengerName": "Alex", "route": "Sector V → Riverside Mall", "date": "Aug 29, 2026 · 7:05 AM", "fare": 180, "distanceKm": 10.4, "status": "Completed", "rating": 5 },
+    { "id": "rt3", "passengerName": "Nena V.", "route": "Downtown → Barangay Hall", "date": "Aug 26, 2026 · 4:20 PM", "fare": 90, "distanceKm": 5.6, "status": "Completed", "rating": 4 },
+    { "id": "rt4", "passengerName": "Marisol Cruz", "route": "Poblacion → SM Terminal", "date": "Aug 24, 2026 · 8:12 AM", "fare": 30, "distanceKm": 2.0, "status": "Cancelled", "rating": 0 }
+  ],
+  "riderEarnings": {
+    "today": 1240,
+    "week": 6820,
+    "month": 24800,
+    "daily": [
+      { "day": "Mon", "amount": 900 },
+      { "day": "Tue", "amount": 1100 },
+      { "day": "Wed", "amount": 780 },
+      { "day": "Thu", "amount": 1240 },
+      { "day": "Fri", "amount": 1500 },
+      { "day": "Sat", "amount": 950 },
+      { "day": "Sun", "amount": 350 }
+    ],
+    "payoutHistory": [
+      { "id": "po1", "date": "Aug 27, 2026", "amount": 1850, "method": "GCash", "status": "Completed" },
+      { "id": "po2", "date": "Aug 20, 2026", "amount": 2200, "method": "GCash", "status": "Completed" },
+      { "id": "po3", "date": "Aug 13, 2026", "amount": 1600, "method": "Maya", "status": "Completed" }
+    ]
+  },
+  "accountSettings": {
+    "passenger": { "pushNotifications": true, "smsAlerts": true, "lowDataMode": false, "language": "English" },
+    "rider": { "pushNotifications": true, "autoAcceptNearby": false, "lowDataMode": false, "language": "English" }
+  }
+}
