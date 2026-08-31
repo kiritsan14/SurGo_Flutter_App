@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import '../data/db_models.dart';
 import '../data/db_service.dart';
-import '../data/models.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../widgets/common.dart';
@@ -53,8 +53,82 @@ class LiveTripScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = AppState.instance;
     final db = DbService.instance;
-    final driver = MockData.matchedDriver;
+    final activeRide = state.activeRide;
+    final rider = db.rider;
+    final passenger = activeRide != null
+        ? (db.mapPassengers
+                .where((p) =>
+                    p.id == activeRide.passengerId ||
+                    p.name == activeRide.passengerName)
+                .isNotEmpty
+            ? db.mapPassengers.firstWhere((p) =>
+                p.id == activeRide.passengerId ||
+                p.name == activeRide.passengerName)
+            : db.mapPassengers.first)
+        : db.mapPassengers.first;
+
+    final rideMatch = activeRide != null
+        ? db.mapRideRequests
+            .where((request) =>
+                request.passengerId == activeRide.passengerId ||
+                request.id == activeRide.id)
+            .toList()
+        : <MapRideRequest>[];
+    final matchedRequest = rideMatch.isNotEmpty ? rideMatch.first : null;
+
+    final driverPosition = db.mapRiders.isNotEmpty
+        ? db.mapRiders.first.position
+        : db.mapConfig.defaultCenter;
+    final pickupPoint = matchedRequest?.pickup ?? passenger.position;
+    final destinationPoint = matchedRequest != null
+        ? MapPoint(
+            passenger.position.latitude + 0.0032,
+            passenger.position.longitude + 0.0045,
+          )
+        : driverPosition;
+
+    final markers = <SurgoMapMarker>[
+      SurgoMapMarker(
+        id: 'driver',
+        position: driverPosition,
+        icon: surgoMarkerIcon('motorcycle'),
+        title: 'You',
+        subtitle: '${rider.vehicleType} · ${rider.vehiclePlate}',
+        details: [
+          MapEntry('Name', rider.name),
+          MapEntry('Vehicle', rider.vehicleModel),
+        ],
+      ),
+      SurgoMapMarker(
+        id: 'pickup',
+        position: pickupPoint,
+        icon: surgoMarkerIcon('passenger'),
+        title: activeRide?.passengerName ?? passenger.name,
+        subtitle: activeRide != null
+            ? '${activeRide.pickupBarangay} · ${activeRide.pickupPurok}'
+            : '${passenger.barangay} · ${passenger.purok}',
+        details: [
+          MapEntry('Pick-up', activeRide?.pickup ?? passenger.barangay),
+          MapEntry('Fare', '₱${activeRide?.fare ?? 0}'),
+        ],
+      ),
+      SurgoMapMarker(
+        id: 'destination',
+        position: destinationPoint,
+        icon: surgoMarkerIcon('rental'),
+        title: 'Destination',
+        subtitle: activeRide != null
+            ? '${activeRide.dropoffBarangay} · ${activeRide.dropoffPurok}'
+            : 'Trip destination',
+        details: [
+          MapEntry('ETA', '${activeRide?.etaMinutes ?? 0} min'),
+          MapEntry('Payment', activeRide?.paymentMethod ?? 'Cash'),
+        ],
+      ),
+    ];
+
     final mapHeight = MediaQuery.of(context).size.height * 0.5;
     return Scaffold(
       body: Column(
@@ -68,7 +142,7 @@ class LiveTripScreen extends StatelessWidget {
                   borderRadius: BorderRadius.zero,
                   fallbackCenter: db.mapConfig.defaultCenter,
                   initialZoom: db.mapConfig.defaultZoom,
-                  markers: const [],
+                  markers: markers,
                   interactive: false,
                 ),
                 Positioned(
@@ -128,27 +202,34 @@ class LiveTripScreen extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const SbTag('On the way · 4 min', secondary: true),
-                            Text('${driver.vehicleType} · ${driver.plate}',
-                                style: const TextStyle(
-                                    color: AppColors.muted, fontSize: 11.5)),
+                            SbTag(
+                              activeRide != null
+                                  ? 'On the way · ${activeRide.etaMinutes} min'
+                                  : 'Ride details',
+                              secondary: true,
+                            ),
+                            Text(
+                              '${rider.vehicleType} · ${rider.vehiclePlate}',
+                              style: const TextStyle(
+                                  color: AppColors.muted, fontSize: 11.5),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 14),
                         Row(
                           children: [
-                            SbAvatar(initials: driver.initials),
+                            SbAvatar(initials: rider.initials),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(driver.name,
+                                  Text(rider.name,
                                       style: const TextStyle(
                                           fontWeight: FontWeight.w800,
                                           fontSize: 14)),
                                   Text(
-                                      '⭐ ${driver.rating} · ${driver.trips} trips',
+                                      '⭐ ${rider.rating} · ${rider.totalTrips} trips',
                                       style: const TextStyle(
                                           color: AppColors.muted,
                                           fontSize: 11.5)),
@@ -159,9 +240,7 @@ class LiveTripScreen extends StatelessWidget {
                               icon: Icons.call_outlined,
                               onTap: () =>
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(
-                                        'Simulated call to ${driver.name}')),
+                                SnackBar(content: Text('Call ${rider.name}')),
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -184,8 +263,7 @@ class LiveTripScreen extends StatelessWidget {
                     label: 'Share this trip',
                     icon: Icons.shield_outlined,
                     onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Trip link copied (simulated)')),
+                      SnackBar(content: Text('Trip link copied (simulated)')),
                     ),
                   ),
                   const SizedBox(height: 12),

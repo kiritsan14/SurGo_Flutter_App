@@ -8,7 +8,6 @@ import 'active_rental_screen.dart';
 import 'activity_screen.dart';
 import 'assisted_booking_screen.dart';
 import 'notifications_screen.dart';
-import 'wallet_screen.dart';
 
 /// The passenger Home tab. When [embedded] is true (the normal case, as a
 /// page inside [PassengerShell]) it renders just its content with no
@@ -30,8 +29,11 @@ class _HomeContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = AppState.instance;
-    final firstName = state.ready ? state.db.passenger.firstName : MockData.passengerFirstName;
-    final recentRides = state.ready ? state.rideHistory.take(3).toList() : <RideHistoryItem>[];
+    final firstName = state.ready
+        ? state.db.passenger.firstName
+        : MockData.passengerFirstName;
+    final recentRides =
+        state.ready ? state.rideHistory.take(3).toList() : <RideHistoryItem>[];
     return SafeArea(
       bottom: false,
       child: ListView(
@@ -45,7 +47,8 @@ class _HomeContent extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Hello, $firstName 👋',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w800)),
                     const SizedBox(height: 2),
                     const Text('Where are we headed today?',
                         style: TextStyle(color: AppColors.muted, fontSize: 12)),
@@ -58,7 +61,8 @@ class _HomeContent extends StatelessWidget {
                   children: [
                     SbIconButton(
                       icon: Icons.map_outlined,
-                      onTap: () => Navigator.pushNamed(context, '/map/passenger'),
+                      onTap: () =>
+                          Navigator.pushNamed(context, '/map/passenger'),
                     ),
                     const SizedBox(width: 8),
                     Stack(
@@ -68,7 +72,8 @@ class _HomeContent extends StatelessWidget {
                           icon: Icons.notifications_none,
                           onTap: () => Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+                            MaterialPageRoute(
+                                builder: (_) => const NotificationsScreen()),
                           ),
                         ),
                         if (state.unreadNotifications > 0)
@@ -107,7 +112,8 @@ class _HomeContent extends StatelessWidget {
               borderRadius: BorderRadius.circular(14),
               onTap: () => Navigator.pushNamed(context, '/booking'),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
                 decoration: BoxDecoration(
                   color: AppColors.panel,
                   borderRadius: BorderRadius.circular(14),
@@ -118,7 +124,10 @@ class _HomeContent extends StatelessWidget {
                     Icon(Icons.search, size: 18, color: AppColors.muted),
                     SizedBox(width: 10),
                     Text('Where are you going?',
-                        style: TextStyle(color: AppColors.muted, fontSize: 13, fontWeight: FontWeight.w600)),
+                        style: TextStyle(
+                            color: AppColors.muted,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600)),
                   ],
                 ),
               ),
@@ -135,7 +144,9 @@ class _HomeContent extends StatelessWidget {
                     children: [
                       Icon(Icons.electric_rickshaw, color: AppColors.primary),
                       SizedBox(height: 8),
-                      Text('Ride', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5)),
+                      Text('Ride',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w800, fontSize: 12.5)),
                     ],
                   ),
                 ),
@@ -149,7 +160,9 @@ class _HomeContent extends StatelessWidget {
                     children: [
                       Icon(Icons.directions_car, color: AppColors.secondary),
                       SizedBox(height: 8),
-                      Text('Rent', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5)),
+                      Text('Rent',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w800, fontSize: 12.5)),
                     ],
                   ),
                 ),
@@ -159,13 +172,18 @@ class _HomeContent extends StatelessWidget {
           const SizedBox(height: 10),
           SbCard(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AssistedBookingScreen())),
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const AssistedBookingScreen())),
             child: const Row(
               children: [
                 Icon(Icons.family_restroom, size: 18, color: AppColors.muted),
                 SizedBox(width: 10),
                 Expanded(
-                  child: Text('Book for Someone Else', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
+                  child: Text('Book for Someone Else',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w700, fontSize: 12.5)),
                 ),
                 Icon(Icons.chevron_right, size: 16, color: AppColors.muted),
               ],
@@ -181,10 +199,13 @@ class _HomeContent extends StatelessWidget {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 4),
                 child: SbCard(
-                  borderColor: (isPending ? AppColors.primary : AppColors.secondary).withValues(alpha: 0.35),
+                  borderColor:
+                      (isPending ? AppColors.primary : AppColors.secondary)
+                          .withValues(alpha: 0.35),
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const ActiveRentalScreen()),
+                    MaterialPageRoute(
+                        builder: (_) => const ActiveRentalScreen()),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,10 +217,13 @@ class _HomeContent extends StatelessWidget {
                             height: 38,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: isPending ? AppColors.primarySoft : AppColors.secondarySoft,
+                              color: isPending
+                                  ? AppColors.primarySoft
+                                  : AppColors.secondarySoft,
                               borderRadius: BorderRadius.circular(11),
                             ),
-                            child: Icon(booking.icon, size: 18, color: AppColors.primaryLight),
+                            child: Icon(booking.icon,
+                                size: 18, color: AppColors.primaryLight),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -207,9 +231,12 @@ class _HomeContent extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(booking.vehicleName,
-                                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5)),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 12.5)),
                                 Text('Owned by ${booking.ownerName}',
-                                    style: const TextStyle(color: AppColors.muted, fontSize: 11)),
+                                    style: const TextStyle(
+                                        color: AppColors.muted, fontSize: 11)),
                               ],
                             ),
                           ),
@@ -225,18 +252,21 @@ class _HomeContent extends StatelessWidget {
                               height: 12,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation(AppColors.primaryLight),
+                                valueColor: AlwaysStoppedAnimation(
+                                    AppColors.primaryLight),
                               ),
                             )
                           else
-                            const Icon(Icons.check_circle, size: 14, color: AppColors.secondaryLight),
+                            const Icon(Icons.check_circle,
+                                size: 14, color: AppColors.secondaryLight),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               isPending
                                   ? 'Waiting for ${booking.ownerName} to approve your rental request…'
                                   : 'Your rental is active — tap to view details.',
-                              style: const TextStyle(color: AppColors.muted, fontSize: 11.5),
+                              style: const TextStyle(
+                                  color: AppColors.muted, fontSize: 11.5),
                             ),
                           ),
                         ],
@@ -252,7 +282,8 @@ class _HomeContent extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+              border:
+                  Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
               gradient: LinearGradient(
                 colors: [AppColors.primarySoft, Colors.transparent],
               ),
@@ -262,7 +293,9 @@ class _HomeContent extends StatelessWidget {
               children: [
                 Text('₱30 off your next 3 rides',
                     style: TextStyle(
-                        fontWeight: FontWeight.w800, fontSize: 13, color: AppColors.primaryLight)),
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                        color: AppColors.primaryLight)),
                 SizedBox(height: 2),
                 Text('Use code SURGO30 · Ends in 2 days',
                     style: TextStyle(color: AppColors.muted, fontSize: 11.5)),
@@ -273,11 +306,17 @@ class _HomeContent extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Recent Bookings', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
+              const Text('Recent Bookings',
+                  style:
+                      TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
               GestureDetector(
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ActivityScreen())),
+                onTap: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const ActivityScreen())),
                 child: const Text('View All',
-                    style: TextStyle(color: AppColors.primaryLight, fontSize: 12, fontWeight: FontWeight.w700)),
+                    style: TextStyle(
+                        color: AppColors.primaryLight,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700)),
               ),
             ],
           ),
@@ -297,7 +336,8 @@ class _HomeContent extends StatelessWidget {
                         color: AppColors.panel2,
                         borderRadius: BorderRadius.circular(11),
                       ),
-                      child: const Icon(Icons.electric_rickshaw, size: 20, color: AppColors.muted),
+                      child: const Icon(Icons.electric_rickshaw,
+                          size: 20, color: AppColors.muted),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -305,10 +345,12 @@ class _HomeContent extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(b.route,
-                              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 12.5)),
                           const SizedBox(height: 2),
                           Text('${b.date} · ₱${b.fare}',
-                              style: const TextStyle(color: AppColors.muted, fontSize: 11)),
+                              style: const TextStyle(
+                                  color: AppColors.muted, fontSize: 11)),
                         ],
                       ),
                     ),

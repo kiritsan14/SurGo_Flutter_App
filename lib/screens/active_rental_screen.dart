@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/db_service.dart';
+import '../data/db_models.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../widgets/common.dart';
@@ -17,18 +18,49 @@ class ActiveRentalScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = AppState.instance;
     final db = DbService.instance;
+    // When opened from Vehicle Owner mode, the specific booking is passed directly.
+    final ownerArg =
+        ModalRoute.of(context)?.settings.arguments as OwnerBookingRequest?;
+
     return Scaffold(
       body: ListenableBuilder(
         listenable: state,
         builder: (context, _) {
-          final booking = state.activeRentalBooking;
-          if (booking == null) {
+          // If no owner arg was passed, fall back to the passenger's active booking simulation.
+          final passengerBooking = state.activeRentalBooking;
+
+          if (ownerArg == null && passengerBooking == null) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (Navigator.canPop(context)) Navigator.pop(context);
             });
             return const SizedBox.shrink();
           }
-          final isPending = booking.status == 'Pending';
+
+          final isOwnerMode = ownerArg != null;
+          final isPending = isOwnerMode
+              ? ownerArg.status == 'Pending'
+              : passengerBooking!.status == 'Pending';
+
+          final statusString =
+              isOwnerMode ? ownerArg.status : passengerBooking!.status;
+          const iconData = Icons.electric_rickshaw;
+
+          final vehicleName = isOwnerMode
+              ? ownerArg.vehicleName
+              : passengerBooking!.vehicleName;
+          final avatarInitials = isOwnerMode
+              ? ownerArg.renterInitials
+              : passengerBooking!.ownerInitials;
+          final targetName =
+              isOwnerMode ? ownerArg.renterName : passengerBooking!.ownerName;
+          final namePrefix = isOwnerMode ? 'Rented to' : 'Owned by';
+          final pickup =
+              isOwnerMode ? ownerArg.startDate : passengerBooking!.pickupLabel;
+          final dropoff =
+              isOwnerMode ? ownerArg.endDate : passengerBooking!.returnLabel;
+          final totalFare =
+              isOwnerMode ? ownerArg.totalFare : passengerBooking!.totalFare;
+
           return SafeArea(
             child: Column(
               children: [
@@ -91,7 +123,7 @@ class ActiveRentalScreen extends StatelessWidget {
                                       width: 2,
                                     ),
                                   ),
-                                  child: Icon(booking.icon,
+                                  child: Icon(iconData,
                                       size: 28, color: AppColors.primaryLight),
                                 ),
                               ],
@@ -135,8 +167,11 @@ class ActiveRentalScreen extends StatelessWidget {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  SbTag(booking.status, secondary: !isPending),
-                                  Text(booking.vehicleType,
+                                  SbTag(statusString, secondary: !isPending),
+                                  Text(
+                                      isOwnerMode
+                                          ? 'Vehicle'
+                                          : passengerBooking!.vehicleType,
                                       style: const TextStyle(
                                           color: AppColors.muted,
                                           fontSize: 11.5)),
@@ -145,18 +180,18 @@ class ActiveRentalScreen extends StatelessWidget {
                               const SizedBox(height: 14),
                               Row(
                                 children: [
-                                  SbAvatar(initials: booking.ownerInitials),
+                                  SbAvatar(initials: avatarInitials),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text(booking.vehicleName,
+                                        Text(vehicleName,
                                             style: const TextStyle(
                                                 fontWeight: FontWeight.w800,
                                                 fontSize: 14)),
-                                        Text('Owned by ${booking.ownerName}',
+                                        Text('$namePrefix $targetName',
                                             style: const TextStyle(
                                                 color: AppColors.muted,
                                                 fontSize: 11.5)),
@@ -170,13 +205,11 @@ class ActiveRentalScreen extends StatelessWidget {
                                 children: [
                                   Expanded(
                                       child: SbField(
-                                          label: 'Pick-up',
-                                          value: booking.pickupLabel)),
+                                          label: 'Pick-up', value: pickup)),
                                   const SizedBox(width: 8),
                                   Expanded(
                                       child: SbField(
-                                          label: 'Return',
-                                          value: booking.returnLabel)),
+                                          label: 'Return', value: dropoff)),
                                 ],
                               ),
                               const SizedBox(height: 10),
@@ -185,11 +218,13 @@ class ActiveRentalScreen extends StatelessWidget {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                      '${booking.days} day${booking.days > 1 ? 's' : ''} total',
+                                      isOwnerMode
+                                          ? 'Total price'
+                                          : '${passengerBooking!.days} day${passengerBooking!.days > 1 ? 's' : ''} total',
                                       style: const TextStyle(
                                           color: AppColors.muted,
                                           fontSize: 12)),
-                                  Text('₱${booking.totalFare}',
+                                  Text('₱$totalFare',
                                       style: const TextStyle(
                                           fontWeight: FontWeight.w800,
                                           color: AppColors.primaryLight,
@@ -201,16 +236,21 @@ class ActiveRentalScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          isPending
-                              ? '${booking.ownerName} has been notified of your request. This usually takes a few minutes — we\'ll update this screen the moment it\'s approved.'
-                              : 'Your rental is active. Ride safe, and tap "Return Vehicle" once you bring it back to the owner.',
+                          isOwnerMode
+                              ? 'This rental is active. The renter has your vehicle until the return date.'
+                              : (isPending
+                                  ? '$targetName has been notified of your request. This usually takes a few minutes — we\'ll update this screen the moment it\'s approved.'
+                                  : 'Your rental is active. Ride safe, and tap "Return Vehicle" once you bring it back to the owner.'),
                           style: const TextStyle(
                               color: AppColors.muted,
                               fontSize: 12,
                               height: 1.6),
                         ),
                         const SizedBox(height: 18),
-                        if (isPending)
+                        if (isOwnerMode)
+                          const SizedBox
+                              .shrink() // Owners don't complete rentals here, they see it on their end / or mark returned elsewhere.
+                        else if (isPending)
                           SbOutlineButton(
                             label: 'Cancel Request',
                             icon: Icons.close,
@@ -229,7 +269,7 @@ class ActiveRentalScreen extends StatelessWidget {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                     content: Text(
-                                        '${booking.vehicleName} returned — thanks for riding with SurGo!')),
+                                        '$vehicleName returned — thanks for riding with SurGo!')),
                               );
                             },
                           ),

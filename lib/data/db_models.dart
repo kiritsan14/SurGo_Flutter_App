@@ -66,7 +66,8 @@ class WalletTransaction {
     required this.status,
   });
 
-  factory WalletTransaction.fromJson(Map<String, dynamic> j) => WalletTransaction(
+  factory WalletTransaction.fromJson(Map<String, dynamic> j) =>
+      WalletTransaction(
         id: j['id'],
         type: j['type'],
         title: j['title'],
@@ -93,7 +94,8 @@ class PaymentMethodItem {
     required this.isDefault,
   });
 
-  factory PaymentMethodItem.fromJson(Map<String, dynamic> j) => PaymentMethodItem(
+  factory PaymentMethodItem.fromJson(Map<String, dynamic> j) =>
+      PaymentMethodItem(
         id: j['id'],
         type: j['type'],
         label: j['label'],
@@ -214,7 +216,8 @@ class EmergencyContactItem {
     required this.phone,
   });
 
-  factory EmergencyContactItem.fromJson(Map<String, dynamic> j) => EmergencyContactItem(
+  factory EmergencyContactItem.fromJson(Map<String, dynamic> j) =>
+      EmergencyContactItem(
         id: j['id'],
         name: j['name'],
         relation: j['relation'],
@@ -274,7 +277,8 @@ class RentalHistoryItem {
     required this.status,
   });
 
-  factory RentalHistoryItem.fromJson(Map<String, dynamic> j) => RentalHistoryItem(
+  factory RentalHistoryItem.fromJson(Map<String, dynamic> j) =>
+      RentalHistoryItem(
         id: j['id'],
         vehicleName: j['vehicleName'],
         ownerName: j['ownerName'],
@@ -463,7 +467,8 @@ class VehicleOwnerProfile {
     required this.verified,
   });
 
-  factory VehicleOwnerProfile.fromJson(Map<String, dynamic> j) => VehicleOwnerProfile(
+  factory VehicleOwnerProfile.fromJson(Map<String, dynamic> j) =>
+      VehicleOwnerProfile(
         id: j['id'],
         name: j['name'],
         initials: j['initials'],
@@ -495,58 +500,82 @@ class Barangay {
 /// support an expandable "view details / map" card.
 class RideRequestItem {
   final String id;
+  final String? passengerId;
+  final String? riderId;
+  final String? vehicleId;
   final String passengerName;
   final String passengerInitials;
   final double passengerRating;
   final String pickupBarangay;
   final String pickupPurok;
   final String pickup;
+  final double? pickupLatitude;
+  final double? pickupLongitude;
   final String dropoffBarangay;
   final String dropoffPurok;
   final String dropoff;
+  final double? dropoffLatitude;
+  final double? dropoffLongitude;
   final double distanceKm;
   final int etaMinutes;
   final int fare;
   final String paymentMethod;
   final String note;
   final String requestedAt;
+  String status;
 
-  const RideRequestItem({
+  RideRequestItem({
     required this.id,
+    this.passengerId,
+    this.riderId,
+    this.vehicleId,
     required this.passengerName,
     required this.passengerInitials,
     required this.passengerRating,
     required this.pickupBarangay,
     required this.pickupPurok,
     required this.pickup,
+    this.pickupLatitude,
+    this.pickupLongitude,
     required this.dropoffBarangay,
     required this.dropoffPurok,
     required this.dropoff,
+    this.dropoffLatitude,
+    this.dropoffLongitude,
     required this.distanceKm,
     required this.etaMinutes,
     required this.fare,
     required this.paymentMethod,
     required this.note,
     required this.requestedAt,
+    this.status = 'Pending',
   });
 
   factory RideRequestItem.fromJson(Map<String, dynamic> j) => RideRequestItem(
         id: j['id'],
+        passengerId: j['passengerId'] ?? j['passenger_id'],
+        riderId: j['riderId'] ?? j['rider_id'],
+        vehicleId: j['vehicleId'] ?? j['vehicle_id'],
         passengerName: j['passengerName'],
         passengerInitials: j['passengerInitials'],
         passengerRating: (j['passengerRating'] as num).toDouble(),
         pickupBarangay: j['pickupBarangay'],
         pickupPurok: j['pickupPurok'],
         pickup: j['pickup'],
+        pickupLatitude: (j['pickupLatitude'] as num?)?.toDouble(),
+        pickupLongitude: (j['pickupLongitude'] as num?)?.toDouble(),
         dropoffBarangay: j['dropoffBarangay'],
         dropoffPurok: j['dropoffPurok'],
         dropoff: j['dropoff'],
+        dropoffLatitude: (j['dropoffLatitude'] as num?)?.toDouble(),
+        dropoffLongitude: (j['dropoffLongitude'] as num?)?.toDouble(),
         distanceKm: (j['distanceKm'] as num).toDouble(),
         etaMinutes: j['etaMinutes'],
         fare: j['fare'],
         paymentMethod: j['paymentMethod'],
         note: j['note'] ?? '',
         requestedAt: j['requestedAt'] ?? 'Just now',
+        status: j['status'] ?? 'Pending',
       );
 }
 
@@ -568,7 +597,8 @@ class VehicleDocumentItem {
     required this.icon,
   });
 
-  factory VehicleDocumentItem.fromJson(Map<String, dynamic> j) => VehicleDocumentItem(
+  factory VehicleDocumentItem.fromJson(Map<String, dynamic> j) =>
+      VehicleDocumentItem(
         id: j['id'],
         title: j['title'],
         number: j['number'],
@@ -666,7 +696,9 @@ class OwnedVehicle {
       case 'Truck':
         return Icons.local_shipping_outlined;
       default:
-        return type == 'Van' || type == 'Multicab' ? Icons.airport_shuttle : Icons.directions_car;
+        return type == 'Van' || type == 'Multicab'
+            ? Icons.airport_shuttle
+            : Icons.directions_car;
     }
   }
 }
@@ -674,33 +706,73 @@ class OwnedVehicle {
 /// An incoming rental booking request for one of the owner's vehicles.
 class OwnerBookingRequest {
   final String id;
+  final String? renterId;
+  final String? ownerId;
+  final String? vehicleId;
   final String renterName;
   final String renterInitials;
   final String vehicleName;
   final String startDate;
   final String endDate;
+  final String? startTime;
+  final String? endTime;
+  final int? durationHours;
   final int totalFare;
+  final String? paymentMethod;
+  final String? pickupLocation;
+  final String? currentLocation;
+  final double? pickupLatitude;
+  final double? pickupLongitude;
+  final double? vehicleLatitude;
+  final double? vehicleLongitude;
   String status; // Pending, Accepted, Declined
 
   OwnerBookingRequest({
     required this.id,
+    this.renterId,
+    this.ownerId,
+    this.vehicleId,
     required this.renterName,
     required this.renterInitials,
     required this.vehicleName,
     required this.startDate,
     required this.endDate,
+    this.startTime,
+    this.endTime,
+    this.durationHours,
     required this.totalFare,
+    this.paymentMethod,
+    this.pickupLocation,
+    this.currentLocation,
+    this.pickupLatitude,
+    this.pickupLongitude,
+    this.vehicleLatitude,
+    this.vehicleLongitude,
     required this.status,
   });
 
-  factory OwnerBookingRequest.fromJson(Map<String, dynamic> j) => OwnerBookingRequest(
+  factory OwnerBookingRequest.fromJson(Map<String, dynamic> j) =>
+      OwnerBookingRequest(
         id: j['id'],
+        renterId: j['renterId'] ?? j['renter_id'],
+        ownerId: j['ownerId'] ?? j['owner_id'],
+        vehicleId: j['vehicleId'] ?? j['vehicle_id'],
         renterName: j['renterName'],
         renterInitials: j['renterInitials'],
         vehicleName: j['vehicleName'],
         startDate: j['startDate'],
         endDate: j['endDate'],
+        startTime: j['startTime'],
+        endTime: j['endTime'],
+        durationHours: j['durationHours'] as int?,
         totalFare: j['totalFare'],
+        paymentMethod: j['paymentMethod'],
+        pickupLocation: j['pickupLocation'],
+        currentLocation: j['currentLocation'],
+        pickupLatitude: (j['pickupLatitude'] as num?)?.toDouble(),
+        pickupLongitude: (j['pickupLongitude'] as num?)?.toDouble(),
+        vehicleLatitude: (j['vehicleLatitude'] as num?)?.toDouble(),
+        vehicleLongitude: (j['vehicleLongitude'] as num?)?.toDouble(),
         status: j['status'],
       );
 }
@@ -720,7 +792,8 @@ class AccountSettingsData {
     required this.language,
   });
 
-  factory AccountSettingsData.fromJson(Map<String, dynamic> j) => AccountSettingsData(
+  factory AccountSettingsData.fromJson(Map<String, dynamic> j) =>
+      AccountSettingsData(
         pushNotifications: j['pushNotifications'] ?? true,
         smsAlerts: j['smsAlerts'] ?? false,
         autoAcceptNearby: j['autoAcceptNearby'] ?? false,
@@ -953,7 +1026,8 @@ class MapRideRequest {
       pickupPurok: pickup['purok'] ?? '',
       destinationBarangay: dest['barangay'] ?? '',
       destinationPurok: dest['purok'] ?? '',
-      estimatedDistanceKm: (j['estimated_distance_km'] as num?)?.toDouble() ?? 0,
+      estimatedDistanceKm:
+          (j['estimated_distance_km'] as num?)?.toDouble() ?? 0,
       estimatedFare: (j['estimated_fare'] as num?)?.toInt() ?? 0,
       paymentMethod: j['payment_method'] ?? 'cash',
       status: j['status'] ?? 'incoming',

@@ -252,113 +252,118 @@ class SbActiveRideBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = AppState.instance;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.secondaryDark, AppColors.primaryDark],
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, '/livetrip');
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [AppColors.secondaryDark, AppColors.primaryDark],
+          ),
+          boxShadow: [
+            BoxShadow(
+                color: AppColors.secondary.withValues(alpha: 0.3),
+                blurRadius: 24,
+                offset: const Offset(0, 10)),
+          ],
         ),
-        boxShadow: [
-          BoxShadow(
-              color: AppColors.secondary.withValues(alpha: 0.3),
-              blurRadius: 24,
-              offset: const Offset(0, 10)),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                    color: Colors.white, shape: BoxShape.circle),
-              ),
-              const SizedBox(width: 8),
-              const Text('ACTIVE RIDE',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 11,
-                      letterSpacing: 0.6)),
-              const Spacer(),
-              Text('₱${ride.fare}',
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14)),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 18,
-                backgroundColor: Colors.white24,
-                child: Text(ride.passengerInitials,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                      color: Colors.white, shape: BoxShape.circle),
+                ),
+                const SizedBox(width: 8),
+                const Text('ACTIVE RIDE',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 11,
+                        letterSpacing: 0.6)),
+                const Spacer(),
+                Text('₱${ride.fare}',
                     style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.w800)),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(ride.passengerName,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 13.5)),
-                    Text('${ride.pickup} → ${ride.dropoff}',
-                        style: const TextStyle(
-                            color: Colors.white70, fontSize: 11)),
-                  ],
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14)),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: Colors.white24,
+                  child: Text(ride.passengerInitials,
+                      style: const TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w800)),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.white54),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 11),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(ride.passengerName,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13.5)),
+                      Text('${ride.pickup} → ${ride.dropoff}',
+                          style: const TextStyle(
+                              color: Colors.white70, fontSize: 11)),
+                    ],
                   ),
-                  onPressed: () => state.cancelActiveRide(),
-                  child: const Text('Cancel'),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: AppColors.onAccent,
-                    padding: const EdgeInsets.symmetric(vertical: 11),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.white54),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 11),
+                    ),
+                    onPressed: () => state.cancelActiveRide(),
+                    child: const Text('Cancel'),
                   ),
-                  onPressed: () {
-                    state.completeActiveRide();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text(
-                              'Trip completed — fare added to your wallet (simulated)')),
-                    );
-                  },
-                  child: const Text('Complete Trip'),
                 ),
-              ),
-            ],
-          ),
-        ],
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: AppColors.onAccent,
+                      padding: const EdgeInsets.symmetric(vertical: 11),
+                    ),
+                    onPressed: () {
+                      state.completeActiveRide();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text(
+                                'Trip completed — fare added to your wallet (simulated)')),
+                      );
+                    },
+                    child: const Text('Complete Trip'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

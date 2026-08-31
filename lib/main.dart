@@ -14,6 +14,7 @@ import 'screens/rate_trip_screen.dart';
 import 'screens/passenger_map_screen.dart';
 import 'screens/rider_map_screen.dart';
 import 'screens/vehicle_owner_map_screen.dart';
+import 'screens/active_rental_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -56,6 +57,7 @@ class SurGoApp extends StatelessWidget {
         '/map/passenger': (context) => const PassengerMapScreen(),
         '/map/rider': (context) => const RiderMapScreen(),
         '/map/owner': (context) => const VehicleOwnerMapScreen(),
+        '/active_rental': (context) => const ActiveRentalScreen(),
       },
     );
   }

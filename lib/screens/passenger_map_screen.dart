@@ -84,22 +84,21 @@ class _PassengerMapScreenState extends State<PassengerMapScreen> {
               child: Row(
                 children: [
                   SbIconButton(
-                      icon: Icons.arrow_back,
-                      onTap: () => Navigator.pop(context)),
+                    icon: Icons.arrow_back,
+                    onTap: () => Navigator.pop(context),
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: SizedBox(
-                      height: 38, // Match the SbIconButton height exactly
+                      height: 36,
                       child: Container(
-                        padding: const EdgeInsets.all(4),
+                        padding: const EdgeInsets.all(3),
                         decoration: BoxDecoration(
                           color: AppColors.panel.withValues(alpha: 0.92),
                           borderRadius: BorderRadius.circular(999),
                           border: Border.all(color: AppColors.border),
                         ),
                         child: Row(
-                          crossAxisAlignment: CrossAxisAlignment
-                              .stretch, // Fills the 38px container evenly
                           children: [
                             _filterChip('All'),
                             _filterChip('Riders'),
@@ -124,6 +123,7 @@ class _PassengerMapScreenState extends State<PassengerMapScreen> {
       child: GestureDetector(
         onTap: () => setState(() => filter = label),
         child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 1),
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: selected ? AppColors.primary : Colors.transparent,
@@ -131,10 +131,12 @@ class _PassengerMapScreenState extends State<PassengerMapScreen> {
           ),
           child: Text(
             label,
+            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11.5,
               fontWeight: FontWeight.w700,
               color: selected ? AppColors.onAccent : AppColors.muted,
+              letterSpacing: 0.1,
             ),
           ),
         ),
