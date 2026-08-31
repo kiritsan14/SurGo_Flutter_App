@@ -15,6 +15,16 @@ class DbService {
 
   late PassengerProfile passenger;
   late RiderProfile rider;
+  late VehicleOwnerProfile vehicleOwner;
+
+  late List<Barangay> barangays;
+  late List<RideRequestItem> rideRequests;
+  late List<VehicleDocumentItem> vehicleDocuments;
+  late List<OwnedVehicle> ownerVehicles;
+  late List<OwnerBookingRequest> ownerBookingRequests;
+  late int ownerEarningsToday;
+  late int ownerEarningsWeek;
+  late int ownerEarningsMonth;
 
   late List<NotificationItem> passengerNotifications;
   late List<NotificationItem> riderNotifications;
@@ -49,6 +59,26 @@ class DbService {
 
     passenger = PassengerProfile.fromJson(j['passenger']);
     rider = RiderProfile.fromJson(j['rider']);
+    vehicleOwner = VehicleOwnerProfile.fromJson(j['vehicleOwner']);
+
+    final locations = j['locations'] as Map<String, dynamic>;
+    barangays =
+        (locations['barangays'] as List).map((e) => Barangay.fromJson(e)).toList();
+
+    rideRequests =
+        (j['rideRequests'] as List).map((e) => RideRequestItem.fromJson(e)).toList();
+    vehicleDocuments = (j['vehicleDocuments'] as List)
+        .map((e) => VehicleDocumentItem.fromJson(e))
+        .toList();
+    ownerVehicles =
+        (j['ownerVehicles'] as List).map((e) => OwnedVehicle.fromJson(e)).toList();
+    ownerBookingRequests = (j['ownerBookingRequests'] as List)
+        .map((e) => OwnerBookingRequest.fromJson(e))
+        .toList();
+    final ownerEarnings = j['ownerEarnings'] as Map<String, dynamic>;
+    ownerEarningsToday = ownerEarnings['today'];
+    ownerEarningsWeek = ownerEarnings['week'];
+    ownerEarningsMonth = ownerEarnings['month'];
 
     final notif = j['notifications'] as Map<String, dynamic>;
     passengerNotifications = (notif['passenger'] as List)

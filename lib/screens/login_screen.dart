@@ -1,10 +1,41 @@
 import 'package:flutter/material.dart';
 import '../data/models.dart';
+import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../widgets/common.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  late final TextEditingController phoneCtrl =
+      TextEditingController(text: MockData.phoneNumber);
+  bool googleLoading = false;
+
+  @override
+  void dispose() {
+    phoneCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _continueWithGoogle() async {
+    setState(() => googleLoading = true);
+    // Simulated OAuth round-trip — Google sign-in skips the OTP step
+    // entirely since the phone number never needs to be verified this way.
+    await Future.delayed(const Duration(milliseconds: 900));
+    if (!mounted) return;
+    setState(() => googleLoading = false);
+    await AppState.instance.init();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Signed in with Google as Jr Derigay (simulated)')),
+    );
+    Navigator.pushNamedAndRemoveUntil(context, '/home', (r) => false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,15 +54,21 @@ class LoginScreen extends StatelessWidget {
                 style: TextStyle(color: AppColors.muted, fontSize: 13),
               ),
               const SizedBox(height: 26),
-              const SbField(
+              SbEditableField(
                 label: 'Phone Number',
-                value: MockData.phoneNumber,
-                leading: Icon(Icons.phone, size: 18, color: AppColors.text),
+                controller: phoneCtrl,
+                keyboardType: TextInputType.phone,
+                hintText: '+63 9XX XXX XXXX',
+                leading: const Icon(Icons.phone, size: 18, color: AppColors.text),
               ),
               const SizedBox(height: 22),
               SbPrimaryButton(
                 label: 'Next',
-                onPressed: () => Navigator.pushNamed(context, '/otp'),
+                onPressed: () => Navigator.pushNamed(
+                  context,
+                  '/otp',
+                  arguments: {'phone': phoneCtrl.text.trim()},
+                ),
               ),
               const SizedBox(height: 22),
               Row(
@@ -46,7 +83,17 @@ class LoginScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 22),
-              const SbOutlineButton(label: 'Continue with Google'),
+              SbGlowButton(
+                label: googleLoading ? 'Signing in…' : 'Continue with Google',
+                icon: googleLoading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryLight),
+                      )
+                    : const SbGoogleMark(),
+                onPressed: googleLoading ? null : _continueWithGoogle,
+              ),
               const Spacer(),
               const Padding(
                 padding: EdgeInsets.only(bottom: 10),

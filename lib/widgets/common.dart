@@ -143,11 +143,12 @@ class SbField extends StatelessWidget {
   final String label;
   final String value;
   final Widget? leading;
-  const SbField({super.key, required this.label, required this.value, this.leading});
+  final VoidCallback? onTap;
+  const SbField({super.key, required this.label, required this.value, this.leading, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final content = Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: AppColors.panel,
@@ -179,7 +180,17 @@ class SbField extends StatelessWidget {
               ],
             ),
           ),
+          if (onTap != null) const Icon(Icons.chevron_right, size: 18, color: AppColors.muted),
         ],
+      ),
+    );
+    if (onTap == null) return content;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: content,
       ),
     );
   }
@@ -306,6 +317,151 @@ class SbOutlineButton extends StatelessWidget {
       ),
     );
     return block ? SizedBox(width: double.infinity, child: btn) : btn;
+  }
+}
+
+/// A full-width button with a soft purple glow around it — used for the
+/// "Continue with Google" action so it reads as clickable and distinct from
+/// the plain outline button.
+class SbGlowButton extends StatelessWidget {
+  final String label;
+  final Widget icon;
+  final VoidCallback? onPressed;
+  const SbGlowButton({super.key, required this.label, required this.icon, this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.45),
+            blurRadius: 22,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Material(
+        color: AppColors.panel,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onPressed,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 15),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.primary.withValues(alpha: 0.6), width: 1.4),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                icon,
+                const SizedBox(width: 10),
+                Text(
+                  label,
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: AppColors.text),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Small circular "G" mark used on the Google button — a lightweight stand-in
+/// for the Google logo that keeps the four brand colors without importing an
+/// external icon asset.
+class SbGoogleMark extends StatelessWidget {
+  final double size;
+  const SbGoogleMark({super.key, this.size = 18});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+      child: Text(
+        'G',
+        style: TextStyle(
+          fontSize: size * 0.68,
+          fontWeight: FontWeight.w900,
+          height: 1,
+          foreground: Paint()
+            ..shader = const LinearGradient(
+              colors: [Color(0xFF4285F4), Color(0xFFEA4335), Color(0xFFFBBC05), Color(0xFF34A853)],
+            ).createShader(Rect.fromLTWH(0, 0, size, size)),
+        ),
+      ),
+    );
+  }
+}
+
+/// An editable phone-number field styled like [SbField] but with a real
+/// [TextField] inside it, used on the login screen.
+class SbEditableField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final Widget? leading;
+  final TextInputType? keyboardType;
+  final String? hintText;
+  const SbEditableField({
+    super.key,
+    required this.label,
+    required this.controller,
+    this.leading,
+    this.keyboardType,
+    this.hintText,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.panel,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          if (leading != null) ...[leading!, const SizedBox(width: 10)],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label.toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 10.5,
+                    color: AppColors.muted2,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+                TextField(
+                  controller: controller,
+                  keyboardType: keyboardType,
+                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700),
+                  decoration: InputDecoration(
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 4),
+                    border: InputBorder.none,
+                    hintText: hintText,
+                    hintStyle: const TextStyle(color: AppColors.muted, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

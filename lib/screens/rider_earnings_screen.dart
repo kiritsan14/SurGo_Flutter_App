@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
+import '../widgets/app_shell.dart';
 import '../widgets/common.dart';
 import 'wallet_screen.dart';
 
 class RiderEarningsScreen extends StatelessWidget {
-  const RiderEarningsScreen({super.key});
+  final bool embedded;
+  const RiderEarningsScreen({super.key, this.embedded = false});
 
   @override
   Widget build(BuildContext context) {
     final state = AppState.instance;
-    return Scaffold(
-      appBar: AppBar(title: const Text('Earnings')),
-      body: ListenableBuilder(
-        listenable: state,
-        builder: (context, _) {
-          final maxAmount = state.dailyEarnings.map((d) => d.amount).reduce((a, b) => a > b ? a : b);
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(18, 12, 18, 24),
-            children: [
+    final body = ListenableBuilder(
+      listenable: state,
+      builder: (context, _) {
+        final maxAmount = state.dailyEarnings.map((d) => d.amount).reduce((a, b) => a > b ? a : b);
+        return ListView(
+          padding: EdgeInsets.fromLTRB(18, embedded ? 0 : 12, 18, embedded ? 90 : 24),
+          children: [
+            if (embedded) const SbTabHeader(title: 'Earnings'),
               Row(
                 children: [
                   Expanded(child: _statCard('₱${state.earningsToday}', 'Today')),
@@ -108,8 +109,9 @@ class RiderEarningsScreen extends StatelessWidget {
             ],
           );
         },
-      ),
-    );
+      );
+    if (embedded) return SafeArea(bottom: false, child: body);
+    return Scaffold(appBar: AppBar(title: const Text('Earnings')), body: body);
   }
 
   Widget _statCard(String value, String label) {

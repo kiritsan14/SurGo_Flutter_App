@@ -3,7 +3,7 @@ import '../data/models.dart';
 import '../data/db_models.dart';
 import '../data/db_service.dart';
 
-enum UserMode { passenger, rider }
+enum UserMode { passenger, rider, vehicleOwner }
 
 /// Everything here lives only in memory for the lifetime of the app run.
 /// There is no backend, no local storage, no network — purely a UI
@@ -38,6 +38,17 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void switchToVehicleOwner() {
+    mode = UserMode.vehicleOwner;
+    notifyListeners();
+  }
+
+  /// Central switcher used by the 3-mode dropdown menu.
+  void switchToMode(UserMode m) {
+    mode = m;
+    notifyListeners();
+  }
+
   // ---- booking draft ----
   String pickupLabel = 'Purok 3, Barangay Poblacion';
   String destinationLabel = 'SM Terminal, Downtown';
@@ -61,15 +72,47 @@ class AppState extends ChangeNotifier {
 
   // ---- rider / driver mode ----
   bool riderOnline = true;
-  final List<RideRequest> pendingRequests = List.of(MockData.incomingRequests);
+  List<RideRequestItem> get pendingRequests => db.rideRequests;
+
+  /// The request the rider currently has accepted, shown as a banner above
+  /// the incoming-requests list until the trip is completed or cancelled.
+  RideRequestItem? activeRide;
 
   void toggleRiderOnline() {
     riderOnline = !riderOnline;
     notifyListeners();
   }
 
-  void respondToRequest(RideRequest request, {required bool accepted}) {
-    pendingRequests.remove(request);
+  void respondToRequest(RideRequestItem request, {required bool accepted}) {
+    db.rideRequests.remove(request);
+    if (accepted) {
+      activeRide = request;
+    }
+    notifyListeners();
+  }
+
+  void completeActiveRide() {
+    if (activeRide == null) return;
+    db.riderTrips.insert(
+      0,
+      RiderTripItem(
+        id: 'rt${DateTime.now().microsecondsSinceEpoch}',
+        passengerName: activeRide!.passengerName,
+        route: '${activeRide!.pickup} → ${activeRide!.dropoff}',
+        date: 'Just now',
+        fare: activeRide!.fare,
+        distanceKm: activeRide!.distanceKm,
+        status: 'Completed',
+        rating: 5,
+      ),
+    );
+    db.riderWalletBalance += activeRide!.fare;
+    activeRide = null;
+    notifyListeners();
+  }
+
+  void cancelActiveRide() {
+    activeRide = null;
     notifyListeners();
   }
 
@@ -314,6 +357,28 @@ class AppState extends ChangeNotifier {
 
   void updateRiderSettings(void Function(AccountSettingsData s) update) {
     update(db.riderSettings);
+    notifyListeners();
+  }
+
+  // ---- Tandag City locations (barangay + purok) ----
+  List<Barangay> get barangays => db.barangays;
+
+  // ---- vehicle documents ----
+  List<VehicleDocumentItem> get vehicleDocuments => db.vehicleDocuments;
+
+  // ---- vehicle owner mode ----
+  List<OwnedVehicle> get ownerVehicles => db.ownerVehicles;
+  List<OwnerBookingRequest> get ownerBookingRequests => db.ownerBookingRequests;
+  int get ownerEarningsToday => db.ownerEarningsToday;
+  int get ownerEarningsWeek => db.ownerEarningsWeek;
+  int get ownerEarningsMonth => db.ownerEarningsMonth;
+
+  void respondToOwnerBooking(OwnerBookingRequest request, {required bool accepted}) {
+    request.status = accepted ? 'Accepted' : 'Declined';
+    if (accepted) {
+      final vehicle = db.ownerVehicles.where((v) => v.name == request.vehicleName);
+      if (vehicle.isNotEmpty) vehicle.first.status = 'Rented';
+    }
     notifyListeners();
   }
 }

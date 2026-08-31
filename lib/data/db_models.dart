@@ -438,6 +438,243 @@ class RiderProfile {
       );
 }
 
+class VehicleOwnerProfile {
+  final String id;
+  final String name;
+  final String initials;
+  final String phone;
+  final String email;
+  final double rating;
+  final int totalVehicles;
+  final int totalRentals;
+  final int memberSince;
+  final bool verified;
+
+  const VehicleOwnerProfile({
+    required this.id,
+    required this.name,
+    required this.initials,
+    required this.phone,
+    required this.email,
+    required this.rating,
+    required this.totalVehicles,
+    required this.totalRentals,
+    required this.memberSince,
+    required this.verified,
+  });
+
+  factory VehicleOwnerProfile.fromJson(Map<String, dynamic> j) => VehicleOwnerProfile(
+        id: j['id'],
+        name: j['name'],
+        initials: j['initials'],
+        phone: j['phone'],
+        email: j['email'],
+        rating: (j['rating'] as num).toDouble(),
+        totalVehicles: j['totalVehicles'],
+        totalRentals: j['totalRentals'],
+        memberSince: j['memberSince'],
+        verified: j['verified'] ?? false,
+      );
+}
+
+/// One barangay in Tandag City, together with its puroks — used to power
+/// the pickup/destination barangay + purok picker.
+class Barangay {
+  final String name;
+  final List<String> puroks;
+
+  const Barangay({required this.name, required this.puroks});
+
+  factory Barangay.fromJson(Map<String, dynamic> j) => Barangay(
+        name: j['barangay'],
+        puroks: (j['puroks'] as List).map((e) => e.toString()).toList(),
+      );
+}
+
+/// A rich incoming ride request shown to a rider, with enough detail to
+/// support an expandable "view details / map" card.
+class RideRequestItem {
+  final String id;
+  final String passengerName;
+  final String passengerInitials;
+  final double passengerRating;
+  final String pickupBarangay;
+  final String pickupPurok;
+  final String pickup;
+  final String dropoffBarangay;
+  final String dropoffPurok;
+  final String dropoff;
+  final double distanceKm;
+  final int etaMinutes;
+  final int fare;
+  final String paymentMethod;
+  final String note;
+  final String requestedAt;
+
+  const RideRequestItem({
+    required this.id,
+    required this.passengerName,
+    required this.passengerInitials,
+    required this.passengerRating,
+    required this.pickupBarangay,
+    required this.pickupPurok,
+    required this.pickup,
+    required this.dropoffBarangay,
+    required this.dropoffPurok,
+    required this.dropoff,
+    required this.distanceKm,
+    required this.etaMinutes,
+    required this.fare,
+    required this.paymentMethod,
+    required this.note,
+    required this.requestedAt,
+  });
+
+  factory RideRequestItem.fromJson(Map<String, dynamic> j) => RideRequestItem(
+        id: j['id'],
+        passengerName: j['passengerName'],
+        passengerInitials: j['passengerInitials'],
+        passengerRating: (j['passengerRating'] as num).toDouble(),
+        pickupBarangay: j['pickupBarangay'],
+        pickupPurok: j['pickupPurok'],
+        pickup: j['pickup'],
+        dropoffBarangay: j['dropoffBarangay'],
+        dropoffPurok: j['dropoffPurok'],
+        dropoff: j['dropoff'],
+        distanceKm: (j['distanceKm'] as num).toDouble(),
+        etaMinutes: j['etaMinutes'],
+        fare: j['fare'],
+        paymentMethod: j['paymentMethod'],
+        note: j['note'] ?? '',
+        requestedAt: j['requestedAt'] ?? 'Just now',
+      );
+}
+
+/// A verified rider/vehicle compliance document (driver's license, OR/CR…).
+class VehicleDocumentItem {
+  final String id;
+  final String title;
+  final String number;
+  final String status;
+  final String expiry;
+  final String icon;
+
+  const VehicleDocumentItem({
+    required this.id,
+    required this.title,
+    required this.number,
+    required this.status,
+    required this.expiry,
+    required this.icon,
+  });
+
+  factory VehicleDocumentItem.fromJson(Map<String, dynamic> j) => VehicleDocumentItem(
+        id: j['id'],
+        title: j['title'],
+        number: j['number'],
+        status: j['status'],
+        expiry: j['expiry'],
+        icon: j['icon'] ?? 'file',
+      );
+
+  IconData get iconData {
+    switch (icon) {
+      case 'license':
+        return Icons.badge_outlined;
+      case 'orcr':
+        return Icons.description_outlined;
+      case 'insurance':
+        return Icons.shield_outlined;
+      case 'clearance':
+        return Icons.verified_user_outlined;
+      case 'nbi':
+        return Icons.fingerprint;
+      default:
+        return Icons.insert_drive_file_outlined;
+    }
+  }
+}
+
+/// A vehicle owned by the current user in Vehicle Owner mode.
+class OwnedVehicle {
+  final String id;
+  final String name;
+  final String type;
+  final String plate;
+  final int pricePerDay;
+  String status; // Listed, Rented, Maintenance
+  final double rating;
+  final int totalRentals;
+
+  OwnedVehicle({
+    required this.id,
+    required this.name,
+    required this.type,
+    required this.plate,
+    required this.pricePerDay,
+    required this.status,
+    required this.rating,
+    required this.totalRentals,
+  });
+
+  factory OwnedVehicle.fromJson(Map<String, dynamic> j) => OwnedVehicle(
+        id: j['id'],
+        name: j['name'],
+        type: j['type'],
+        plate: j['plate'],
+        pricePerDay: j['pricePerDay'],
+        status: j['status'],
+        rating: (j['rating'] as num).toDouble(),
+        totalRentals: j['totalRentals'],
+      );
+
+  IconData get icon {
+    switch (type) {
+      case 'Motorcycle':
+        return Icons.two_wheeler;
+      case 'Multicab':
+      case 'Van':
+        return Icons.airport_shuttle;
+      default:
+        return Icons.directions_car;
+    }
+  }
+}
+
+/// An incoming rental booking request for one of the owner's vehicles.
+class OwnerBookingRequest {
+  final String id;
+  final String renterName;
+  final String renterInitials;
+  final String vehicleName;
+  final String startDate;
+  final String endDate;
+  final int totalFare;
+  String status; // Pending, Accepted, Declined
+
+  OwnerBookingRequest({
+    required this.id,
+    required this.renterName,
+    required this.renterInitials,
+    required this.vehicleName,
+    required this.startDate,
+    required this.endDate,
+    required this.totalFare,
+    required this.status,
+  });
+
+  factory OwnerBookingRequest.fromJson(Map<String, dynamic> j) => OwnerBookingRequest(
+        id: j['id'],
+        renterName: j['renterName'],
+        renterInitials: j['renterInitials'],
+        vehicleName: j['vehicleName'],
+        startDate: j['startDate'],
+        endDate: j['endDate'],
+        totalFare: j['totalFare'],
+        status: j['status'],
+      );
+}
+
 class AccountSettingsData {
   bool pushNotifications;
   bool smsAlerts;

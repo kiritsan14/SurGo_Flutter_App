@@ -2,25 +2,26 @@ import 'package:flutter/material.dart';
 import '../data/db_models.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
+import '../widgets/app_shell.dart';
 import '../widgets/common.dart';
 
 class WalletScreen extends StatelessWidget {
   final bool isRider;
-  const WalletScreen({super.key, this.isRider = false});
+  final bool embedded;
+  const WalletScreen({super.key, this.isRider = false, this.embedded = false});
 
   @override
   Widget build(BuildContext context) {
     final state = AppState.instance;
-    return Scaffold(
-      appBar: AppBar(title: Text(isRider ? 'Earnings Wallet' : 'Wallet')),
-      body: ListenableBuilder(
-        listenable: state,
-        builder: (context, _) {
-          final balance = isRider ? state.riderWalletBalance : state.passengerWalletBalance;
-          final txns = isRider ? state.riderTransactions : state.passengerTransactions;
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 24),
-            children: [
+    final body = ListenableBuilder(
+      listenable: state,
+      builder: (context, _) {
+        final balance = isRider ? state.riderWalletBalance : state.passengerWalletBalance;
+        final txns = isRider ? state.riderTransactions : state.passengerTransactions;
+        return ListView(
+          padding: EdgeInsets.fromLTRB(18, embedded ? 0 : 14, 18, embedded ? 90 : 24),
+          children: [
+            if (embedded) SbTabHeader(title: isRider ? 'Earnings Wallet' : 'Wallet'),
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
@@ -73,8 +74,9 @@ class WalletScreen extends StatelessWidget {
             ],
           );
         },
-      ),
-    );
+      );
+    if (embedded) return SafeArea(bottom: false, child: body);
+    return Scaffold(appBar: AppBar(title: Text(isRider ? 'Earnings Wallet' : 'Wallet')), body: body);
   }
 
   Widget _txnTile(WalletTransaction t) {

@@ -80,32 +80,13 @@ class RentalVehicle {
   });
 }
 
-/// An incoming ride request shown to a rider (driver).
-class RideRequest {
-  final String passengerName;
-  final double distanceKm;
-  final String pickup;
-  final String dropoff;
-  final int etaMinutes;
-  final int fare;
-
-  const RideRequest({
-    required this.passengerName,
-    required this.distanceKm,
-    required this.pickup,
-    required this.dropoff,
-    required this.etaMinutes,
-    required this.fare,
-  });
-}
-
 /// Static/mock seed data for the whole simulation.
 class MockData {
   MockData._();
 
-  static const passengerName = 'Marisol Cruz';
-  static const passengerFirstName = 'Marisol';
-  static const passengerInitials = 'MC';
+  static const passengerName = 'Jr Derigay';
+  static const passengerFirstName = 'Jr';
+  static const passengerInitials = 'JD';
   static const passengerRating = 4.9;
   static const memberSince = 2024;
   static const phoneNumber = '+63 917 512 4809';
@@ -196,29 +177,13 @@ class MockData {
     ),
   ];
 
-  static const riderName = 'Rahel Santos';
-  static const riderInitials = 'RS';
+  static const riderName = 'Jr Derigay';
+  static const riderInitials = 'JD';
   static const riderId = 'FFI03892';
   static const riderEarningsToday = 1240;
   static const riderTripsToday = 4;
   static const riderOnlineTime = '5h 20m';
 
-  static const List<RideRequest> incomingRequests = [
-    RideRequest(
-      passengerName: 'Alex',
-      distanceKm: 10.4,
-      pickup: 'Sector V',
-      dropoff: 'Riverside Mall',
-      etaMinutes: 26,
-      fare: 180,
-    ),
-    RideRequest(
-      passengerName: 'Grace',
-      distanceKm: 3.1,
-      pickup: 'Purok 3',
-      dropoff: 'Public Market',
-      etaMinutes: 9,
-      fare: 55,
-    ),
-  ];
+  static const vehicleOwnerName = 'Jr Derigay';
+  static const vehicleOwnerInitials = 'JD';
 }

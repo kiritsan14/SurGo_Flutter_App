@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/otp_screen.dart';
-import 'screens/home_screen.dart';
+import 'screens/passenger_shell.dart';
 import 'screens/booking_screen.dart';
 import 'screens/matching_screen.dart';
 import 'screens/live_trip_screen.dart';
 import 'screens/rental_list_screen.dart';
-import 'screens/rider_home_screen.dart';
+import 'screens/rider_shell.dart';
+import 'screens/vehicle_owner_shell.dart';
 import 'screens/profile_screen.dart';
 import 'screens/rate_trip_screen.dart';
 import 'theme/app_theme.dart';
@@ -36,13 +37,17 @@ class SurGoApp extends StatelessWidget {
         '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
         '/otp': (context) => const OtpScreen(),
-        '/home': (context) => const HomeScreen(),
+        // The three dashboards are each a sliding-tab "shell" — Home,
+        // Activity/Trips/Bookings, Wallet/Earnings, and Profile all live as
+        // pages inside a PageView instead of being separate pushed routes.
+        '/home': (context) => const PassengerShell(),
+        '/rider': (context) => const RiderShell(),
+        '/owner': (context) => const VehicleOwnerShell(),
         '/booking': (context) => const BookingScreen(),
         '/matching': (context) => const MatchingScreen(),
         '/livetrip': (context) => const LiveTripScreen(),
         '/rental': (context) => const RentalListScreen(),
-        '/rider': (context) => const RiderHomeScreen(),
-        '/profile': (context) => const ProfileScreen(),
+        '/profile': (context) => const ProfileScreen(embedded: false),
         '/rate': (context) => const RateTripScreen(),
       },
     );

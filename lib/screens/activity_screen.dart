@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
+import '../widgets/app_shell.dart';
 import '../widgets/common.dart';
 
 class ActivityScreen extends StatefulWidget {
-  const ActivityScreen({super.key});
+  final bool embedded;
+  const ActivityScreen({super.key, this.embedded = false});
 
   @override
   State<ActivityScreen> createState() => _ActivityScreenState();
@@ -16,35 +18,35 @@ class _ActivityScreenState extends State<ActivityScreen> {
   @override
   Widget build(BuildContext context) {
     final state = AppState.instance;
-    return Scaffold(
-      appBar: AppBar(title: const Text('Activity')),
-      body: ListenableBuilder(
-        listenable: state,
-        builder: (context, _) {
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 10, 18, 6),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: SbChip('Rides', active: showRides, onTap: () => setState(() => showRides = true)),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: SbChip('Rentals', active: !showRides, onTap: () => setState(() => showRides = false)),
-                    ),
-                  ],
-                ),
+    final body = ListenableBuilder(
+      listenable: state,
+      builder: (context, _) {
+        return Column(
+          children: [
+            if (widget.embedded) const SbTabHeader(title: 'Activity'),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 10, 18, 6),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: SbChip('Rides', active: showRides, onTap: () => setState(() => showRides = true)),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: SbChip('Rentals', active: !showRides, onTap: () => setState(() => showRides = false)),
+                  ),
+                ],
               ),
-              Expanded(
-                child: showRides ? _rideList(state) : _rentalList(state),
-              ),
-            ],
-          );
-        },
-      ),
+            ),
+            Expanded(
+              child: showRides ? _rideList(state) : _rentalList(state),
+            ),
+          ],
+        );
+      },
     );
+    if (widget.embedded) return SafeArea(bottom: false, child: body);
+    return Scaffold(appBar: AppBar(title: const Text('Activity')), body: body);
   }
 
   Widget _rideList(AppState state) {
@@ -53,7 +55,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
       return const Center(child: Text('No rides yet', style: TextStyle(color: AppColors.muted)));
     }
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(18, 10, 18, 24),
+      padding: EdgeInsets.fromLTRB(18, 10, 18, widget.embedded ? 90 : 24),
       itemCount: rides.length,
       separatorBuilder: (_, __) => const SizedBox(height: 10),
       itemBuilder: (context, i) {
@@ -109,7 +111,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
       return const Center(child: Text('No rentals yet', style: TextStyle(color: AppColors.muted)));
     }
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(18, 10, 18, 24),
+      padding: EdgeInsets.fromLTRB(18, 10, 18, widget.embedded ? 90 : 24),
       itemCount: rentals.length,
       separatorBuilder: (_, __) => const SizedBox(height: 10),
       itemBuilder: (context, i) {

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
+import '../widgets/app_shell.dart';
 import '../widgets/common.dart';
+import '../widgets/mode_switcher.dart';
 import 'account_settings_screen.dart';
 import 'activity_screen.dart';
 import 'emergency_contacts_screen.dart';
@@ -11,20 +13,22 @@ import 'saved_places_screen.dart';
 import 'wallet_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  final bool embedded;
+  const ProfileScreen({super.key, this.embedded = true});
 
   @override
   Widget build(BuildContext context) {
     final state = AppState.instance;
-    return Scaffold(
-      body: ListenableBuilder(
-        listenable: state,
-        builder: (context, _) {
-          final passenger = state.db.passenger;
-          return SafeArea(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(18, 16, 18, 90),
-              children: [
+    final body = ListenableBuilder(
+      listenable: state,
+      builder: (context, _) {
+        final passenger = state.db.passenger;
+        return SafeArea(
+          bottom: false,
+          child: ListView(
+            padding: EdgeInsets.fromLTRB(18, embedded ? 4 : 16, 18, 90),
+            children: [
+              if (embedded) const SbTabHeader(title: 'Profile'),
                 Center(
                   child: Column(
                     children: [
@@ -95,48 +99,14 @@ class ProfileScreen extends StatelessWidget {
                     onTap: () =>
                         Navigator.push(context, MaterialPageRoute(builder: (_) => const AccountSettingsScreen()))),
                 const SizedBox(height: 20),
-                SbCard(
-                  onTap: () {
-                    state.switchToRider();
-                    Navigator.pushNamedAndRemoveUntil(context, '/rider', (route) => false);
-                  },
-                  borderColor: AppColors.secondary.withValues(alpha: 0.35),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.swap_horiz, color: AppColors.secondaryLight, size: 20),
-                      SizedBox(width: 10),
-                      Expanded(
-                        child: Text('Switch to Rider', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                      ),
-                      Icon(Icons.chevron_right, color: AppColors.muted, size: 18),
-                    ],
-                  ),
-                ),
+                const SbModeSwitcher(),
               ],
             ),
           );
         },
-      ),
-      bottomNavigationBar: SbBottomNav(
-        activeIndex: 3,
-        items: const [
-          SbNavItem(Icons.home_rounded, 'Home'),
-          SbNavItem(Icons.receipt_long, 'Activity'),
-          SbNavItem(Icons.account_balance_wallet_outlined, 'Wallet'),
-          SbNavItem(Icons.person_outline, 'Profile'),
-        ],
-        onTap: (i) {
-          if (i == 3) return;
-          if (i == 0) {
-            Navigator.popUntil(context, ModalRoute.withName('/home'));
-          } else if (i == 1) {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const ActivityScreen()));
-          } else if (i == 2) {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const WalletScreen()));
-          }
-        },
-      ),
-    );
+      );
+    if (embedded) return body;
+    return Scaffold(body: body);
   }
 
   Widget _quickAction(BuildContext context,

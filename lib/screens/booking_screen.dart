@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../widgets/common.dart';
+import '../widgets/location_picker.dart';
 
 class BookingScreen extends StatelessWidget {
   const BookingScreen({super.key});
@@ -55,12 +56,20 @@ class BookingScreen extends StatelessWidget {
                       label: 'Pickup',
                       value: state.pickupLabel,
                       leading: const _Dot(color: AppColors.secondary, square: false),
+                      onTap: () async {
+                        final picked = await showLocationPicker(context, title: 'Set pickup location');
+                        if (picked != null) state.setPickup(picked);
+                      },
                     ),
                     const SizedBox(height: 8),
                     SbField(
                       label: 'Destination',
                       value: state.destinationLabel,
                       leading: const _Dot(color: AppColors.primary, square: true),
+                      onTap: () async {
+                        final picked = await showLocationPicker(context, title: 'Set destination');
+                        if (picked != null) state.setDestination(picked);
+                      },
                     ),
                     const SizedBox(height: 20),
                     const Text('Choose a vehicle',
