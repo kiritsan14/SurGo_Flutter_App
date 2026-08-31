@@ -39,12 +39,21 @@ class RiderHomeScreen extends StatelessWidget {
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    SbIconButton(
-                      icon: Icons.notifications_none,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const NotificationsScreen(isRider: true)),
-                      ),
+                    Row(
+                      children: [
+                        SbIconButton(
+                          icon: Icons.map_outlined,
+                          onTap: () => Navigator.pushNamed(context, '/map/rider'),
+                        ),
+                        const SizedBox(width: 8),
+                        SbIconButton(
+                          icon: Icons.notifications_none,
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const NotificationsScreen(isRider: true)),
+                          ),
+                        ),
+                      ],
                     ),
                     if (state.unreadRiderNotifications > 0)
                       Positioned(

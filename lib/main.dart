@@ -11,6 +11,9 @@ import 'screens/rider_shell.dart';
 import 'screens/vehicle_owner_shell.dart';
 import 'screens/profile_screen.dart';
 import 'screens/rate_trip_screen.dart';
+import 'screens/passenger_map_screen.dart';
+import 'screens/rider_map_screen.dart';
+import 'screens/vehicle_owner_map_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -49,6 +52,10 @@ class SurGoApp extends StatelessWidget {
         '/rental': (context) => const RentalListScreen(),
         '/profile': (context) => const ProfileScreen(embedded: false),
         '/rate': (context) => const RateTripScreen(),
+        // Map V1 — one live-map view per role (passenger/rider/vehicle owner).
+        '/map/passenger': (context) => const PassengerMapScreen(),
+        '/map/rider': (context) => const RiderMapScreen(),
+        '/map/owner': (context) => const VehicleOwnerMapScreen(),
       },
     );
   }

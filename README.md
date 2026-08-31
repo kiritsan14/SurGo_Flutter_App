@@ -1,54 +1,102 @@
-# SAKAY BAI — Flutter UI Simulation (v0.1, no backend)
+# SURGO — Flutter Local Transportation & Vehicle Rental Platform
 
-This is a **pure front-end simulation** of the SAKAY BAI app, built from the
-`sakay_bai_v1.html` design bible. There is no server, no database, no auth,
-no network calls, and no persistence — every screen reads/writes to an
-in-memory `AppState` (see `lib/state/app_state.dart`), and all sample
-content lives in `lib/data/models.dart`. Close the app and everything resets.
+SurGo is a **Flutter-based prototype** of a local transportation and vehicle rental platform designed for Tandag City, Surigao del Sur. The application combines passenger ride booking, rider operations, vehicle rentals, and assisted booking into a single mobile platform.
 
-It covers the passenger flow, rentals, and a captain (driver) view — the
-web-only Admin Dashboard from the design doc isn't included since it's
-explicitly a separate web console, not part of the phone app.
+Unlike a traditional ride-hailing prototype with separate driver and passenger accounts, SurGo uses **one unified user identity** that can switch between three modes: **Passenger, Rider, and Vehicle Owner**.
 
-## Screens included
-Splash → Login → OTP → Home → Book a Ride → Matching → Live Trip → Rate Trip,
-plus Rentals (browse → detail → request), Profile (with a "Switch to Captain
-Mode" shortcut), and Captain Home (online toggle, incoming requests).
+The current application uses **mock JSON data and local application state** to simulate users, riders, passengers, vehicles, ride requests, rental requests, vehicle documents, and Tandag City locations. The project is currently focused on demonstrating the application's user interface, navigation, workflows, and map experience before connecting it to a production backend.
 
-## Running it
+## Screens and Features Included
 
-You'll need the Flutter SDK installed locally (this was written and
-organized in an environment without Flutter/network access to pub.dev, so
-it hasn't been built or run yet — do a normal first run to confirm):
+### Passenger Mode
 
-```bash
-flutter pub get
-flutter run          # pick a connected device/simulator, or:
-flutter run -d chrome # to try it in a browser
-```
+Home → Activity → Wallet → Profile
 
-Minimum Flutter version: 3.24+ (uses `Color.withValues`, Material 3).
-If you're on an older Flutter, swap `.withValues(alpha: x)` calls for
-`.withOpacity(x)` — that's the only version-sensitive API used.
+Passenger Mode includes:
 
-## Project structure
+- Automatic location detection
+- Nearby rider discovery
+- Pickup location
+- Destination selection
+- Barangay selection
+- Purok selection
+- Motorcycle and tricycle selection
+- Fare estimation
+- Distance estimation
+- ETA estimation
+- Ride request
+- Nearby/nearest rider matching
+- Rider information
+- Rider rating
+- Active ride
+- Ride completion
+- Ride history
+- Trip rating
+- Rental vehicle browsing
+- Rental vehicle details
+- Rental requests
+- Assisted Booking / Book for Someone
 
-```
-lib/
-├── main.dart              // MaterialApp + named routes
-├── theme/                 // colors + ThemeData (purple-on-black system)
-├── data/models.dart       // all mock data lives here
-├── state/app_state.dart   // in-memory state (booking draft, captain
-│                           // online toggle, trip rating) — no persistence
-├── widgets/common.dart    // shared components: SbCard, SbField, SbChip,
-│                           // SbTag, SbAvatar, SbBottomNav, buttons, etc.
-└── screens/                // one file per screen
-```
+### Rider Mode
 
-## Where to go from here
-- Swap `SbMapPlaceholder` for real map tiles (Google Maps / Mapbox) — it's
-  already positioned to match the design bible's pins/route.
-- Replace `AppState` with a real backend (auth, ride matching, payments)
-  when you're ready to move past simulation.
-- Wire the currently-inert bottom-nav tabs (Activity/Wallet, Trips/Earnings)
-  once there's real data to show.
+Home → Trips → Earnings → Profile
+
+Rider Mode includes:
+
+- Online / Offline status
+- Incoming ride requests
+- Expandable ride request cards
+- Passenger information
+- Pickup information
+- Destination information
+- Payment information
+- Passenger rating
+- Accept ride request
+- Reject ride request
+- Active Ride section
+- Start ride
+- Complete ride
+- Ride history
+- Trip information
+- Earnings
+- Rider ratings
+- Vehicle documents
+- Map view with passenger locations
+
+### Vehicle Owner Mode
+
+Home → Bookings → Earnings → Profile
+
+Vehicle Owner Mode includes:
+
+- Vehicle owner dashboard
+- Owned vehicle list
+- Vehicle information
+- Vehicle photos
+- Vehicle documents
+- Document verification status
+- Rental pricing
+- Rental availability
+- Rental booking requests
+- Accept / manage rental requests
+- Active rentals
+- Rental earnings
+- Rental history
+- Map view with rental vehicles
+
+## User Account
+
+SurGo uses a **single account** that can operate in multiple modes.
+
+Current prototype user:
+
+**Jr Derigay**
+
+```text
+Jr Derigay
+│
+├── Passenger Mode
+│
+├── Rider Mode
+│
+└── Vehicle Owner Mode

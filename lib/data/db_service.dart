@@ -54,6 +54,13 @@ class DbService {
   late AccountSettingsData passengerSettings;
   late AccountSettingsData riderSettings;
 
+  // ---- Map V1 (assets/data/surgo_map_v1_mock_data.json) ----
+  late MapConfigData mapConfig;
+  late List<MapRider> mapRiders;
+  late List<MapRentalVehicle> mapRentalVehicles;
+  late List<MapPassenger> mapPassengers;
+  late List<MapRideRequest> mapRideRequests;
+
   Future<void> load() async {
     if (_loaded) return;
     final raw = await rootBundle.loadString('assets/db/mock_database.json');
@@ -133,6 +140,19 @@ class DbService {
     final settings = j['accountSettings'] as Map<String, dynamic>;
     passengerSettings = AccountSettingsData.fromJson(settings['passenger']);
     riderSettings = AccountSettingsData.fromJson(settings['rider']);
+
+    // Map V1 — separate asset file per the SurGo map data architecture;
+    // parsed into the same DbService rather than a standalone data system.
+    final mapRaw = await rootBundle.loadString('assets/data/surgo_map_v1_mock_data.json');
+    final Map<String, dynamic> mj = json.decode(mapRaw);
+    mapConfig = MapConfigData.fromJson(mj['map_config']);
+    mapRiders = (mj['riders'] as List).map((e) => MapRider.fromJson(e)).toList();
+    mapRentalVehicles =
+        (mj['rental_vehicles'] as List).map((e) => MapRentalVehicle.fromJson(e)).toList();
+    mapPassengers =
+        (mj['passengers'] as List).map((e) => MapPassenger.fromJson(e)).toList();
+    mapRideRequests =
+        (mj['ride_requests'] as List).map((e) => MapRideRequest.fromJson(e)).toList();
 
     _loaded = true;
   }

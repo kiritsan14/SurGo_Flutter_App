@@ -10,6 +10,10 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  geolocator: ^13.0.1
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:
@@ -20,3 +24,4 @@ flutter:
   uses-material-design: true
   assets:
     - assets/db/mock_database.json
+    - assets/data/surgo_map_v1_mock_data.json

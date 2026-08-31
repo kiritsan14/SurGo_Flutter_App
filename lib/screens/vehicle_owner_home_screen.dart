@@ -36,6 +36,10 @@ class VehicleOwnerHomeScreen extends StatelessWidget {
                     ],
                   ),
                 ),
+                SbIconButton(
+                  icon: Icons.map_outlined,
+                  onTap: () => Navigator.pushNamed(context, '/map/owner'),
+                ),
               ],
             ),
             const SizedBox(height: 16),

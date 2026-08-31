@@ -728,3 +728,235 @@ class AccountSettingsData {
         language: j['language'] ?? 'English',
       );
 }
+
+// ============================================================================
+// Map V1 — typed wrappers around assets/data/surgo_map_v1_mock_data.json.
+// Fixed mock coordinates for riders/rentals/passengers/ride-requests; the
+// live device GPS position is resolved separately at runtime by
+// LocationService and is never read from this file.
+// ============================================================================
+
+/// A point on the map. Kept as a plain lat/lng pair (instead of pulling in
+/// latlong2's LatLng here) so this model file has no Flutter-map dependency.
+class MapPoint {
+  final double latitude;
+  final double longitude;
+  const MapPoint(this.latitude, this.longitude);
+
+  factory MapPoint.fromJson(Map<String, dynamic> j) => MapPoint(
+        (j['latitude'] as num).toDouble(),
+        (j['longitude'] as num).toDouble(),
+      );
+}
+
+class MapConfigData {
+  final MapPoint defaultCenter;
+  final double defaultZoom;
+  final String city;
+  final String province;
+
+  const MapConfigData({
+    required this.defaultCenter,
+    required this.defaultZoom,
+    required this.city,
+    required this.province,
+  });
+
+  factory MapConfigData.fromJson(Map<String, dynamic> j) => MapConfigData(
+        defaultCenter: MapPoint.fromJson(j['default_center']),
+        defaultZoom: (j['default_zoom'] as num).toDouble(),
+        city: j['city'] ?? 'Tandag City',
+        province: j['province'] ?? 'Surigao del Sur',
+      );
+}
+
+/// A fixed mock rider/driver shown on the map (motorcycle or tricycle).
+class MapRider {
+  final String id;
+  final String name;
+  final String vehicleType; // motorcycle, tricycle
+  final String vehicleModel;
+  final String markerType;
+  final MapPoint position;
+  final String barangay;
+  final String purok;
+  final double rating;
+  final bool available;
+  final bool verified;
+  final int estimatedFare;
+
+  const MapRider({
+    required this.id,
+    required this.name,
+    required this.vehicleType,
+    required this.vehicleModel,
+    required this.markerType,
+    required this.position,
+    required this.barangay,
+    required this.purok,
+    required this.rating,
+    required this.available,
+    required this.verified,
+    required this.estimatedFare,
+  });
+
+  factory MapRider.fromJson(Map<String, dynamic> j) => MapRider(
+        id: j['id'],
+        name: j['name'],
+        vehicleType: j['vehicle_type'],
+        vehicleModel: j['vehicle_model'],
+        markerType: j['marker_type'] ?? j['vehicle_type'],
+        position: MapPoint(
+          (j['latitude'] as num).toDouble(),
+          (j['longitude'] as num).toDouble(),
+        ),
+        barangay: j['barangay'] ?? '',
+        purok: j['purok'] ?? '',
+        rating: (j['rating'] as num?)?.toDouble() ?? 0,
+        available: j['available'] ?? false,
+        verified: j['verified'] ?? false,
+        estimatedFare: (j['estimated_fare'] as num?)?.toInt() ?? 0,
+      );
+}
+
+/// A fixed mock rental vehicle shown on the map.
+class MapRentalVehicle {
+  final String id;
+  final String ownerId;
+  final String name;
+  final String vehicleType; // motorcycle, tricycle, van, multicab
+  final String markerType;
+  final MapPoint position;
+  final String barangay;
+  final String purok;
+  final int pricePerDay;
+  final int pricePerHour;
+  final double rating;
+  final bool available;
+  final bool verified;
+
+  const MapRentalVehicle({
+    required this.id,
+    required this.ownerId,
+    required this.name,
+    required this.vehicleType,
+    required this.markerType,
+    required this.position,
+    required this.barangay,
+    required this.purok,
+    required this.pricePerDay,
+    required this.pricePerHour,
+    required this.rating,
+    required this.available,
+    required this.verified,
+  });
+
+  factory MapRentalVehicle.fromJson(Map<String, dynamic> j) => MapRentalVehicle(
+        id: j['id'],
+        ownerId: j['owner_id'] ?? '',
+        name: j['name'],
+        vehicleType: j['vehicle_type'],
+        markerType: j['marker_type'] ?? 'rental',
+        position: MapPoint(
+          (j['latitude'] as num).toDouble(),
+          (j['longitude'] as num).toDouble(),
+        ),
+        barangay: j['barangay'] ?? '',
+        purok: j['purok'] ?? '',
+        pricePerDay: (j['price_per_day'] as num?)?.toInt() ?? 0,
+        pricePerHour: (j['price_per_hour'] as num?)?.toInt() ?? 0,
+        rating: (j['rating'] as num?)?.toDouble() ?? 0,
+        available: j['available'] ?? false,
+        verified: j['verified'] ?? false,
+      );
+}
+
+/// A fixed mock passenger shown on the map (rider-mode view).
+class MapPassenger {
+  final String id;
+  final String name;
+  final MapPoint position;
+  final String barangay;
+  final String purok;
+  final double rating;
+  final bool verified;
+  final String requestStatus;
+
+  const MapPassenger({
+    required this.id,
+    required this.name,
+    required this.position,
+    required this.barangay,
+    required this.purok,
+    required this.rating,
+    required this.verified,
+    required this.requestStatus,
+  });
+
+  factory MapPassenger.fromJson(Map<String, dynamic> j) => MapPassenger(
+        id: j['id'],
+        name: j['name'],
+        position: MapPoint(
+          (j['latitude'] as num).toDouble(),
+          (j['longitude'] as num).toDouble(),
+        ),
+        barangay: j['barangay'] ?? '',
+        purok: j['purok'] ?? '',
+        rating: (j['rating'] as num?)?.toDouble() ?? 0,
+        verified: j['verified'] ?? false,
+        requestStatus: j['request_status'] ?? 'waiting',
+      );
+}
+
+/// A fixed mock incoming ride request, linked to a [MapPassenger] by id.
+class MapRideRequest {
+  final String id;
+  final String passengerId;
+  final String preferredVehicleType;
+  final MapPoint pickup;
+  final String pickupBarangay;
+  final String pickupPurok;
+  final String destinationBarangay;
+  final String destinationPurok;
+  final double estimatedDistanceKm;
+  final int estimatedFare;
+  final String paymentMethod;
+  final String status;
+
+  const MapRideRequest({
+    required this.id,
+    required this.passengerId,
+    required this.preferredVehicleType,
+    required this.pickup,
+    required this.pickupBarangay,
+    required this.pickupPurok,
+    required this.destinationBarangay,
+    required this.destinationPurok,
+    required this.estimatedDistanceKm,
+    required this.estimatedFare,
+    required this.paymentMethod,
+    required this.status,
+  });
+
+  factory MapRideRequest.fromJson(Map<String, dynamic> j) {
+    final pickup = j['pickup'] as Map<String, dynamic>;
+    final dest = j['destination'] as Map<String, dynamic>;
+    return MapRideRequest(
+      id: j['id'],
+      passengerId: j['passenger_id'],
+      preferredVehicleType: j['preferred_vehicle_type'] ?? '',
+      pickup: MapPoint(
+        (pickup['latitude'] as num).toDouble(),
+        (pickup['longitude'] as num).toDouble(),
+      ),
+      pickupBarangay: pickup['barangay'] ?? '',
+      pickupPurok: pickup['purok'] ?? '',
+      destinationBarangay: dest['barangay'] ?? '',
+      destinationPurok: dest['purok'] ?? '',
+      estimatedDistanceKm: (j['estimated_distance_km'] as num?)?.toDouble() ?? 0,
+      estimatedFare: (j['estimated_fare'] as num?)?.toInt() ?? 0,
+      paymentMethod: j['payment_method'] ?? 'cash',
+      status: j['status'] ?? 'incoming',
+    );
+  }
+}

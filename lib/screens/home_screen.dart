@@ -54,38 +54,47 @@ class _HomeContent extends StatelessWidget {
               ),
               ListenableBuilder(
                 listenable: state,
-                builder: (context, _) => Stack(
-                  clipBehavior: Clip.none,
+                builder: (context, _) => Row(
                   children: [
                     SbIconButton(
-                      icon: Icons.notifications_none,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const NotificationsScreen()),
-                      ),
+                      icon: Icons.map_outlined,
+                      onTap: () => Navigator.pushNamed(context, '/map/passenger'),
                     ),
-                    if (state.unreadNotifications > 0)
-                      Positioned(
-                        top: -2,
-                        right: -2,
-                        child: Container(
-                          width: 15,
-                          height: 15,
-                          alignment: Alignment.center,
-                          decoration: const BoxDecoration(
-                            color: AppColors.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Text(
-                            '${state.unreadNotifications}',
-                            style: const TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.onAccent,
-                            ),
+                    const SizedBox(width: 8),
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        SbIconButton(
+                          icon: Icons.notifications_none,
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const NotificationsScreen()),
                           ),
                         ),
-                      ),
+                        if (state.unreadNotifications > 0)
+                          Positioned(
+                            top: -2,
+                            right: -2,
+                            child: Container(
+                              width: 15,
+                              height: 15,
+                              alignment: Alignment.center,
+                              decoration: const BoxDecoration(
+                                color: AppColors.primary,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Text(
+                                '${state.unreadNotifications}',
+                                style: const TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.onAccent,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ],
                 ),
               ),

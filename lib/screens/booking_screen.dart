@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import '../data/db_service.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../widgets/common.dart';
 import '../widgets/location_picker.dart';
+import '../widgets/surgo_map.dart';
 
 class BookingScreen extends StatelessWidget {
   const BookingScreen({super.key});
@@ -10,43 +12,34 @@ class BookingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = AppState.instance;
+    final db = DbService.instance;
     return Scaffold(
       body: ListenableBuilder(
         listenable: state,
         builder: (context, _) {
           return Column(
             children: [
-              SbMapPlaceholder(
-                height: MediaQuery.of(context).size.height * 0.36,
-                child: Stack(
-                  children: [
-                    CustomPaint(
-                      painter: _RoutePainter(),
-                      size: Size.infinite,
-                    ),
-                    Positioned(
-                      left: 34,
-                      top: MediaQuery.of(context).size.height * 0.36 * 0.68,
-                      child: _pin(AppColors.secondary, circle: true),
-                    ),
-                    Positioned(
-                      right: 34,
-                      top: 16,
-                      child: Transform.rotate(angle: 0.78, child: _pin(AppColors.primary, circle: false)),
-                    ),
-                    Positioned(
-                      top: 12,
-                      left: 12,
-                      child: SafeArea(
-                        bottom: false,
-                        child: SbIconButton(
-                          icon: Icons.arrow_back,
-                          onTap: () => Navigator.pop(context),
-                        ),
+              Stack(
+                children: [
+                  SurgoMap(
+                    height: MediaQuery.of(context).size.height * 0.36,
+                    borderRadius: BorderRadius.zero,
+                    fallbackCenter: db.mapConfig.defaultCenter,
+                    initialZoom: db.mapConfig.defaultZoom,
+                    markers: const [],
+                  ),
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: SafeArea(
+                      bottom: false,
+                      child: SbIconButton(
+                        icon: Icons.arrow_back,
+                        onTap: () => Navigator.pop(context),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
               Expanded(
                 child: ListView(
@@ -130,17 +123,6 @@ class BookingScreen extends StatelessWidget {
       );
     }).toList();
   }
-
-  Widget _pin(Color color, {required bool circle}) => Container(
-        width: circle ? 14 : 16,
-        height: circle ? 14 : 16,
-        decoration: BoxDecoration(
-          color: color,
-          shape: circle ? BoxShape.circle : BoxShape.rectangle,
-          borderRadius: circle ? null : BorderRadius.circular(4),
-          border: Border.all(color: AppColors.bg, width: 3),
-        ),
-      );
 }
 
 class _Dot extends StatelessWidget {
@@ -160,44 +142,4 @@ class _Dot extends StatelessWidget {
       ),
     );
   }
-}
-
-class _RoutePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppColors.primary
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke;
-    final path = Path()
-      ..moveTo(size.width * 0.1, size.height * 0.73)
-      ..cubicTo(
-        size.width * 0.29, size.height * 0.6,
-        size.width * 0.37, size.height * 0.4,
-        size.width * 0.58, size.height * 0.27,
-      )
-      ..cubicTo(
-        size.width * 0.71, size.height * 0.18,
-        size.width * 0.79, size.height * 0.13,
-        size.width * 0.89, size.height * 0.07,
-      );
-    // dashed effect
-    const dashWidth = 7.0;
-    const dashSpace = 6.0;
-    final metrics = path.computeMetrics();
-    for (final metric in metrics) {
-      double distance = 0;
-      while (distance < metric.length) {
-        final next = distance + dashWidth;
-        canvas.drawPath(
-          metric.extractPath(distance, next.clamp(0, metric.length)),
-          paint,
-        );
-        distance = next + dashSpace;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

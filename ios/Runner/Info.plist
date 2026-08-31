@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>SurGo uses your location to center the map on you and match you with nearby riders and rentals.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>SurGo uses your location to center the map on you and match you with nearby riders and rentals.</string>
 </dict>
 </plist>
