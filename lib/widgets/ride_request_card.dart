@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../data/db_models.dart';
+import '../data/db_service.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import 'common.dart';
+import 'surgo_map.dart';
 
 /// A single incoming-request card on the rider dashboard. Tapping the card
 /// (anywhere but the action buttons) expands it in place to show the full
@@ -37,16 +39,20 @@ class _SbRideRequestCardState extends State<SbRideRequestCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('${r.passengerName} wants a ride',
-                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w800, fontSize: 13)),
                     Text('⭐ ${r.passengerRating} · ${r.requestedAt}',
-                        style: const TextStyle(color: AppColors.muted, fontSize: 11)),
+                        style: const TextStyle(
+                            color: AppColors.muted, fontSize: 11)),
                   ],
                 ),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('${r.distanceKm} km', style: const TextStyle(color: AppColors.muted, fontSize: 11)),
+                  Text('${r.distanceKm} km',
+                      style: const TextStyle(
+                          color: AppColors.muted, fontSize: 11)),
                   Icon(
                     expanded ? Icons.expand_less : Icons.expand_more,
                     size: 18,
@@ -61,7 +67,8 @@ class _SbRideRequestCardState extends State<SbRideRequestCard> {
           AnimatedCrossFade(
             firstChild: const SizedBox(width: double.infinity),
             secondChild: _expandedDetails(context, r),
-            crossFadeState: expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            crossFadeState:
+                expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
             duration: const Duration(milliseconds: 220),
             sizeCurve: Curves.easeOutCubic,
           ),
@@ -70,12 +77,15 @@ class _SbRideRequestCardState extends State<SbRideRequestCard> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('₱${r.fare}',
-                  style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.primaryLight)),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primaryLight)),
               Row(
                 children: [
                   OutlinedButton(
                     style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9)),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 9)),
                     onPressed: () => state.respondToRequest(r, accepted: false),
                     child: const Text('Decline'),
                   ),
@@ -83,12 +93,15 @@ class _SbRideRequestCardState extends State<SbRideRequestCard> {
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.secondary,
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 9),
                     ),
                     onPressed: () {
                       state.respondToRequest(r, accepted: true);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Accepted ${r.passengerName}'s ride (simulated)")),
+                        SnackBar(
+                            content: Text(
+                                "Accepted ${r.passengerName}'s ride (simulated)")),
                       );
                     },
                     child: const Text('Accept'),
@@ -108,9 +121,15 @@ class _SbRideRequestCardState extends State<SbRideRequestCard> {
         style: const TextStyle(color: AppColors.muted, fontSize: 11.5),
         children: [
           const TextSpan(text: '📍 '),
-          TextSpan(text: r.pickup, style: const TextStyle(color: AppColors.text, fontWeight: FontWeight.w600)),
+          TextSpan(
+              text: r.pickup,
+              style: const TextStyle(
+                  color: AppColors.text, fontWeight: FontWeight.w600)),
           const TextSpan(text: ' → 🏁 '),
-          TextSpan(text: r.dropoff, style: const TextStyle(color: AppColors.text, fontWeight: FontWeight.w600)),
+          TextSpan(
+              text: r.dropoff,
+              style: const TextStyle(
+                  color: AppColors.text, fontWeight: FontWeight.w600)),
           TextSpan(text: ' · ${r.etaMinutes} min'),
         ],
       ),
@@ -127,7 +146,8 @@ class _SbRideRequestCardState extends State<SbRideRequestCard> {
           const SizedBox(height: 12),
           _detailRow(Icons.payments_outlined, 'Payment', r.paymentMethod),
           const SizedBox(height: 8),
-          _detailRow(Icons.sticky_note_2_outlined, "Passenger's note", r.note.isEmpty ? '—' : r.note),
+          _detailRow(Icons.sticky_note_2_outlined, "Passenger's note",
+              r.note.isEmpty ? '—' : r.note),
           const SizedBox(height: 12),
           SbOutlineButton(
             label: 'View on Map',
@@ -151,9 +171,16 @@ class _SbRideRequestCardState extends State<SbRideRequestCard> {
             children: [
               Text(label.toUpperCase(),
                   style: const TextStyle(
-                      fontSize: 10, color: AppColors.muted2, fontWeight: FontWeight.w800, letterSpacing: 0.4)),
+                      fontSize: 10,
+                      color: AppColors.muted2,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.4)),
               const SizedBox(height: 2),
-              Text(value, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, height: 1.4)),
+              Text(value,
+                  style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      height: 1.4)),
             ],
           ),
         ),
@@ -162,28 +189,30 @@ class _SbRideRequestCardState extends State<SbRideRequestCard> {
   }
 
   void _showMapSheet(BuildContext context, RideRequestItem r) {
+    final db = DbService.instance;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.panel,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (_) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              child: SbMapPlaceholder(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(20)),
+              child: SurgoMap(
                 height: 260,
-                child: Stack(
-                  children: [
-                    CustomPaint(painter: _DashedRoutePainter(), size: Size.infinite),
-                    const Positioned(left: 30, top: 170, child: _MapPin(color: AppColors.secondary, circle: true)),
-                    const Positioned(right: 30, top: 30, child: _MapPin(color: AppColors.primary, circle: false)),
-                  ],
-                ),
+                fallbackCenter: db.mapConfig.defaultCenter,
+                initialZoom: db.mapConfig.defaultZoom,
+                markers: const [],
+                interactive: false,
+                borderRadius: BorderRadius.zero,
               ),
             ),
             Padding(
@@ -191,13 +220,18 @@ class _SbRideRequestCardState extends State<SbRideRequestCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${r.passengerName}\'s trip', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                  Text('${r.passengerName}\'s trip',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w800, fontSize: 16)),
                   const SizedBox(height: 10),
-                  _detailRow(Icons.radio_button_checked, 'Pickup', '${r.pickupPurok}, ${r.pickupBarangay}'),
+                  _detailRow(Icons.radio_button_checked, 'Pickup',
+                      '${r.pickupPurok}, ${r.pickupBarangay}'),
                   const SizedBox(height: 10),
-                  _detailRow(Icons.place_outlined, 'Dropoff', '${r.dropoffPurok}, ${r.dropoffBarangay}'),
+                  _detailRow(Icons.place_outlined, 'Dropoff',
+                      '${r.dropoffPurok}, ${r.dropoffBarangay}'),
                   const SizedBox(height: 10),
-                  _detailRow(Icons.straighten, 'Distance & ETA', '${r.distanceKm} km · ${r.etaMinutes} min away'),
+                  _detailRow(Icons.straighten, 'Distance & ETA',
+                      '${r.distanceKm} km · ${r.etaMinutes} min away'),
                 ],
               ),
             ),
@@ -206,61 +240,6 @@ class _SbRideRequestCardState extends State<SbRideRequestCard> {
       ),
     );
   }
-}
-
-class _MapPin extends StatelessWidget {
-  final Color color;
-  final bool circle;
-  const _MapPin({required this.color, required this.circle});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: circle ? 14 : 16,
-      height: circle ? 14 : 16,
-      decoration: BoxDecoration(
-        color: color,
-        shape: circle ? BoxShape.circle : BoxShape.rectangle,
-        borderRadius: circle ? null : BorderRadius.circular(4),
-        border: Border.all(color: AppColors.bg, width: 3),
-      ),
-    );
-  }
-}
-
-class _DashedRoutePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppColors.primary
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke;
-    final path = Path()
-      ..moveTo(size.width * 0.1, size.height * 0.7)
-      ..cubicTo(
-        size.width * 0.3, size.height * 0.55,
-        size.width * 0.4, size.height * 0.35,
-        size.width * 0.6, size.height * 0.25,
-      )
-      ..cubicTo(
-        size.width * 0.72, size.height * 0.18,
-        size.width * 0.8, size.height * 0.14,
-        size.width * 0.88, size.height * 0.1,
-      );
-    const dashWidth = 7.0;
-    const dashSpace = 6.0;
-    for (final metric in path.computeMetrics()) {
-      double distance = 0;
-      while (distance < metric.length) {
-        final next = distance + dashWidth;
-        canvas.drawPath(metric.extractPath(distance, next.clamp(0, metric.length)), paint);
-        distance = next + dashSpace;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 /// The banner that appears above "Incoming Requests" once the rider has
@@ -284,7 +263,10 @@ class SbActiveRideBanner extends StatelessWidget {
           colors: [AppColors.secondaryDark, AppColors.primaryDark],
         ),
         boxShadow: [
-          BoxShadow(color: AppColors.secondary.withValues(alpha: 0.3), blurRadius: 24, offset: const Offset(0, 10)),
+          BoxShadow(
+              color: AppColors.secondary.withValues(alpha: 0.3),
+              blurRadius: 24,
+              offset: const Offset(0, 10)),
         ],
       ),
       child: Column(
@@ -295,15 +277,22 @@ class SbActiveRideBanner extends StatelessWidget {
               Container(
                 width: 8,
                 height: 8,
-                decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                decoration: const BoxDecoration(
+                    color: Colors.white, shape: BoxShape.circle),
               ),
               const SizedBox(width: 8),
               const Text('ACTIVE RIDE',
                   style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w800, fontSize: 11, letterSpacing: 0.6)),
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 11,
+                      letterSpacing: 0.6)),
               const Spacer(),
               Text('₱${ride.fare}',
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14)),
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14)),
             ],
           ),
           const SizedBox(height: 10),
@@ -313,7 +302,8 @@ class SbActiveRideBanner extends StatelessWidget {
                 radius: 18,
                 backgroundColor: Colors.white24,
                 child: Text(ride.passengerInitials,
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+                    style: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.w800)),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -321,9 +311,13 @@ class SbActiveRideBanner extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(ride.passengerName,
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 13.5)),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13.5)),
                     Text('${ride.pickup} → ${ride.dropoff}',
-                        style: const TextStyle(color: Colors.white70, fontSize: 11)),
+                        style: const TextStyle(
+                            color: Colors.white70, fontSize: 11)),
                   ],
                 ),
               ),
@@ -354,7 +348,9 @@ class SbActiveRideBanner extends StatelessWidget {
                   onPressed: () {
                     state.completeActiveRide();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Trip completed — fare added to your wallet (simulated)')),
+                      const SnackBar(
+                          content: Text(
+                              'Trip completed — fare added to your wallet (simulated)')),
                     );
                   },
                   child: const Text('Complete Trip'),

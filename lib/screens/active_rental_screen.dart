@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import '../data/db_service.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../widgets/common.dart';
+import '../widgets/surgo_map.dart';
 
 /// Full detail view for the passenger's current rental request/active
 /// rental — pushed from the pending/active card on the Home tab. Reflects
@@ -14,14 +16,13 @@ class ActiveRentalScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = AppState.instance;
+    final db = DbService.instance;
     return Scaffold(
       body: ListenableBuilder(
         listenable: state,
         builder: (context, _) {
           final booking = state.activeRentalBooking;
           if (booking == null) {
-            // Booking was completed/cancelled elsewhere while this screen
-            // was open (e.g. returned from another device in a real app).
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (Navigator.canPop(context)) Navigator.pop(context);
             });
@@ -35,55 +36,86 @@ class ActiveRentalScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(12, 8, 18, 0),
                   child: Row(
                     children: [
-                      SbIconButton(icon: Icons.arrow_back, onTap: () => Navigator.pop(context)),
+                      SbIconButton(
+                          icon: Icons.arrow_back,
+                          onTap: () => Navigator.pop(context)),
                       const SizedBox(width: 10),
-                      const Text('Your Rental', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                      const Text('Your Rental',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w800, fontSize: 16)),
                     ],
                   ),
                 ),
                 const SizedBox(height: 10),
-                SbMapPlaceholder(
+                SizedBox(
                   height: 200,
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Stack(
-                          alignment: Alignment.center,
+                  child: Stack(
+                    children: [
+                      SurgoMap(
+                        height: 200,
+                        fallbackCenter: db.mapConfig.defaultCenter,
+                        initialZoom: db.mapConfig.defaultZoom,
+                        markers: const [],
+                        interactive: false,
+                        borderRadius: BorderRadius.zero,
+                      ),
+                      Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (isPending)
-                              SizedBox(
-                                width: 84,
-                                height: 84,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  valueColor: const AlwaysStoppedAnimation(AppColors.primary),
-                                  backgroundColor: AppColors.panel2,
-                                ),
-                              ),
-                            Container(
-                              width: 64,
-                              height: 64,
+                            Stack(
                               alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: AppColors.panel,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: isPending ? AppColors.primary : AppColors.secondary,
-                                  width: 2,
+                              children: [
+                                if (isPending)
+                                  SizedBox(
+                                    width: 84,
+                                    height: 84,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      valueColor: const AlwaysStoppedAnimation(
+                                          AppColors.primary),
+                                      backgroundColor: AppColors.panel2,
+                                    ),
+                                  ),
+                                Container(
+                                  width: 64,
+                                  height: 64,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.panel,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: isPending
+                                          ? AppColors.primary
+                                          : AppColors.secondary,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Icon(booking.icon,
+                                      size: 28, color: AppColors.primaryLight),
                                 ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppColors.panel.withValues(alpha: 0.8),
+                                borderRadius: BorderRadius.circular(6),
                               ),
-                              child: Icon(booking.icon, size: 28, color: AppColors.primaryLight),
+                              child: Text(
+                                isPending
+                                    ? 'Waiting for owner approval…'
+                                    : 'Rental is active',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w800, fontSize: 13),
+                              ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          isPending ? 'Waiting for owner approval…' : 'Rental is active',
-                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
                 Expanded(
@@ -92,16 +124,22 @@ class ActiveRentalScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         SbCard(
-                          borderColor: (isPending ? AppColors.primary : AppColors.secondary).withValues(alpha: 0.3),
+                          borderColor: (isPending
+                                  ? AppColors.primary
+                                  : AppColors.secondary)
+                              .withValues(alpha: 0.3),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   SbTag(booking.status, secondary: !isPending),
                                   Text(booking.vehicleType,
-                                      style: const TextStyle(color: AppColors.muted, fontSize: 11.5)),
+                                      style: const TextStyle(
+                                          color: AppColors.muted,
+                                          fontSize: 11.5)),
                                 ],
                               ),
                               const SizedBox(height: 14),
@@ -111,12 +149,17 @@ class ActiveRentalScreen extends StatelessWidget {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(booking.vehicleName,
-                                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w800,
+                                                fontSize: 14)),
                                         Text('Owned by ${booking.ownerName}',
-                                            style: const TextStyle(color: AppColors.muted, fontSize: 11.5)),
+                                            style: const TextStyle(
+                                                color: AppColors.muted,
+                                                fontSize: 11.5)),
                                       ],
                                     ),
                                   ),
@@ -125,20 +168,32 @@ class ActiveRentalScreen extends StatelessWidget {
                               const SizedBox(height: 14),
                               Row(
                                 children: [
-                                  Expanded(child: SbField(label: 'Pick-up', value: booking.pickupLabel)),
+                                  Expanded(
+                                      child: SbField(
+                                          label: 'Pick-up',
+                                          value: booking.pickupLabel)),
                                   const SizedBox(width: 8),
-                                  Expanded(child: SbField(label: 'Return', value: booking.returnLabel)),
+                                  Expanded(
+                                      child: SbField(
+                                          label: 'Return',
+                                          value: booking.returnLabel)),
                                 ],
                               ),
                               const SizedBox(height: 10),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('${booking.days} day${booking.days > 1 ? 's' : ''} total',
-                                      style: const TextStyle(color: AppColors.muted, fontSize: 12)),
+                                  Text(
+                                      '${booking.days} day${booking.days > 1 ? 's' : ''} total',
+                                      style: const TextStyle(
+                                          color: AppColors.muted,
+                                          fontSize: 12)),
                                   Text('₱${booking.totalFare}',
                                       style: const TextStyle(
-                                          fontWeight: FontWeight.w800, color: AppColors.primaryLight, fontSize: 15)),
+                                          fontWeight: FontWeight.w800,
+                                          color: AppColors.primaryLight,
+                                          fontSize: 15)),
                                 ],
                               ),
                             ],
@@ -149,7 +204,10 @@ class ActiveRentalScreen extends StatelessWidget {
                           isPending
                               ? '${booking.ownerName} has been notified of your request. This usually takes a few minutes — we\'ll update this screen the moment it\'s approved.'
                               : 'Your rental is active. Ride safe, and tap "Return Vehicle" once you bring it back to the owner.',
-                          style: const TextStyle(color: AppColors.muted, fontSize: 12, height: 1.6),
+                          style: const TextStyle(
+                              color: AppColors.muted,
+                              fontSize: 12,
+                              height: 1.6),
                         ),
                         const SizedBox(height: 18),
                         if (isPending)
@@ -169,7 +227,9 @@ class ActiveRentalScreen extends StatelessWidget {
                               state.completeActiveRental();
                               Navigator.pop(context);
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('${booking.vehicleName} returned — thanks for riding with SurGo!')),
+                                SnackBar(
+                                    content: Text(
+                                        '${booking.vehicleName} returned — thanks for riding with SurGo!')),
                               );
                             },
                           ),
