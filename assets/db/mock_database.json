@@ -186,6 +186,35 @@
           "status": "Completed"
         }
       ]
+    },
+    "owner": {
+      "balance": 4200,
+      "transactions": [
+        {
+          "id": "owt1",
+          "type": "credit",
+          "title": "Rental payout · Suzuki Multicab",
+          "amount": 1800,
+          "date": "Aug 27, 2026",
+          "status": "Completed"
+        },
+        {
+          "id": "owt2",
+          "type": "credit",
+          "title": "Rental payout · Honda Click 125",
+          "amount": 700,
+          "date": "Aug 24, 2026",
+          "status": "Completed"
+        },
+        {
+          "id": "owt3",
+          "type": "payout",
+          "title": "Payout to GCash",
+          "amount": 1000,
+          "date": "Aug 20, 2026",
+          "status": "Completed"
+        }
+      ]
     }
   },
   "paymentMethods": [
@@ -832,7 +861,8 @@
       "pricePerDay": 350,
       "status": "Listed",
       "rating": 4.9,
-      "totalRentals": 18
+      "totalRentals": 18,
+      "category": "2-Wheel"
     },
     {
       "id": "ov2",
@@ -842,7 +872,8 @@
       "pricePerDay": 900,
       "status": "Rented",
       "rating": 4.7,
-      "totalRentals": 9
+      "totalRentals": 9,
+      "category": "4-Wheel"
     },
     {
       "id": "ov3",
@@ -852,7 +883,8 @@
       "pricePerDay": 3200,
       "status": "Maintenance",
       "rating": 4.8,
-      "totalRentals": 19
+      "totalRentals": 19,
+      "category": "4-Wheel"
     }
   ],
   "ownerBookingRequests": [

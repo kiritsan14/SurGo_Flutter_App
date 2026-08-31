@@ -4,6 +4,7 @@ import '../data/models.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../widgets/common.dart';
+import 'active_rental_screen.dart';
 import 'activity_screen.dart';
 import 'assisted_booking_screen.dart';
 import 'notifications_screen.dart';
@@ -161,7 +162,83 @@ class _HomeContent extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 14),
+          ListenableBuilder(
+            listenable: state,
+            builder: (context, _) {
+              final booking = state.activeRentalBooking;
+              if (booking == null) return const SizedBox.shrink();
+              final isPending = booking.status == 'Pending';
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: SbCard(
+                  borderColor: (isPending ? AppColors.primary : AppColors.secondary).withValues(alpha: 0.35),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ActiveRentalScreen()),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 38,
+                            height: 38,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: isPending ? AppColors.primarySoft : AppColors.secondarySoft,
+                              borderRadius: BorderRadius.circular(11),
+                            ),
+                            child: Icon(booking.icon, size: 18, color: AppColors.primaryLight),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(booking.vehicleName,
+                                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5)),
+                                Text('Owned by ${booking.ownerName}',
+                                    style: const TextStyle(color: AppColors.muted, fontSize: 11)),
+                              ],
+                            ),
+                          ),
+                          SbTag(booking.status, secondary: !isPending),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          if (isPending)
+                            const SizedBox(
+                              width: 12,
+                              height: 12,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation(AppColors.primaryLight),
+                              ),
+                            )
+                          else
+                            const Icon(Icons.check_circle, size: 14, color: AppColors.secondaryLight),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              isPending
+                                  ? 'Waiting for ${booking.ownerName} to approve your rental request…'
+                                  : 'Your rental is active — tap to view details.',
+                              style: const TextStyle(color: AppColors.muted, fontSize: 11.5),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 4),
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(

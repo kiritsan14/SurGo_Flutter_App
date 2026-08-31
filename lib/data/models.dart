@@ -80,6 +80,41 @@ class RentalVehicle {
   });
 }
 
+/// The passenger's current rental request, created the moment they tap
+/// "Request Rental" and tracked in memory from then on — this is what
+/// powers the pending-request card on the Home tab and the Active Rental
+/// screen. Unlike the classes above it isn't seeded from JSON; it's created
+/// and mutated at runtime by [AppState].
+class RentalBooking {
+  final String id;
+  final String vehicleName;
+  final String vehicleType;
+  final IconData icon;
+  final String ownerName;
+  final String ownerInitials;
+  final String pickupLabel;
+  final String returnLabel;
+  final int days;
+  final int totalFare;
+  String status; // Pending, Active, Completed, Declined
+  DateTime requestedAt;
+
+  RentalBooking({
+    required this.id,
+    required this.vehicleName,
+    required this.vehicleType,
+    required this.icon,
+    required this.ownerName,
+    required this.ownerInitials,
+    required this.pickupLabel,
+    required this.returnLabel,
+    required this.days,
+    required this.totalFare,
+    required this.status,
+    required this.requestedAt,
+  });
+}
+
 /// Static/mock seed data for the whole simulation.
 class MockData {
   MockData._();

@@ -7,21 +7,26 @@ import '../widgets/common.dart';
 
 class WalletScreen extends StatelessWidget {
   final bool isRider;
+  final bool isOwner;
   final bool embedded;
-  const WalletScreen({super.key, this.isRider = false, this.embedded = false});
+  const WalletScreen({super.key, this.isRider = false, this.isOwner = false, this.embedded = false});
 
   @override
   Widget build(BuildContext context) {
     final state = AppState.instance;
+    final isPayout = isRider || isOwner;
     final body = ListenableBuilder(
       listenable: state,
       builder: (context, _) {
-        final balance = isRider ? state.riderWalletBalance : state.passengerWalletBalance;
-        final txns = isRider ? state.riderTransactions : state.passengerTransactions;
+        final balance =
+            isOwner ? state.ownerWalletBalance : (isRider ? state.riderWalletBalance : state.passengerWalletBalance);
+        final txns =
+            isOwner ? state.ownerTransactions : (isRider ? state.riderTransactions : state.passengerTransactions);
+        final title = isOwner ? 'Owner Wallet' : (isRider ? 'Earnings Wallet' : 'Wallet');
         return ListView(
           padding: EdgeInsets.fromLTRB(18, embedded ? 0 : 14, 18, embedded ? 90 : 24),
           children: [
-            if (embedded) SbTabHeader(title: isRider ? 'Earnings Wallet' : 'Wallet'),
+            if (embedded) SbTabHeader(title: title),
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
@@ -35,7 +40,7 @@ class WalletScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(isRider ? 'Available for payout' : 'Wallet balance',
+                    Text(isPayout ? 'Available for payout' : 'Wallet balance',
                         style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 6),
                     Text('₱$balance',
@@ -45,11 +50,10 @@ class WalletScreen extends StatelessWidget {
                       children: [
                         Expanded(
                           child: SbPrimaryButton(
-                            label: isRider ? 'Cash Out' : 'Top Up',
-                            icon: isRider ? Icons.account_balance_wallet : Icons.add_card,
-                            onPressed: () => isRider
-                                ? _showPayoutSheet(context, state)
-                                : _showTopUpSheet(context, state),
+                            label: isPayout ? 'Cash Out' : 'Top Up',
+                            icon: isPayout ? Icons.account_balance_wallet : Icons.add_card,
+                            onPressed: () =>
+                                isPayout ? _showPayoutSheet(context, state, balance) : _showTopUpSheet(context, state),
                           ),
                         ),
                       ],
@@ -76,7 +80,10 @@ class WalletScreen extends StatelessWidget {
         },
       );
     if (embedded) return SafeArea(bottom: false, child: body);
-    return Scaffold(appBar: AppBar(title: Text(isRider ? 'Earnings Wallet' : 'Wallet')), body: body);
+    return Scaffold(
+      appBar: AppBar(title: Text(isOwner ? 'Owner Wallet' : (isRider ? 'Earnings Wallet' : 'Wallet'))),
+      body: body,
+    );
   }
 
   Widget _txnTile(WalletTransaction t) {
@@ -157,8 +164,8 @@ class WalletScreen extends StatelessWidget {
     );
   }
 
-  void _showPayoutSheet(BuildContext context, AppState state) {
-    final amounts = [500, 1000, 2000, state.riderWalletBalance];
+  void _showPayoutSheet(BuildContext context, AppState state, int balance) {
+    final amounts = {500, 1000, 2000, balance};
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.panel,
@@ -173,18 +180,20 @@ class WalletScreen extends StatelessWidget {
           children: [
             const Text('Cash out to GCash', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
             const SizedBox(height: 4),
-            Text('Available: ₱${state.riderWalletBalance}',
-                style: const TextStyle(color: AppColors.muted, fontSize: 12)),
+            Text('Available: ₱$balance', style: const TextStyle(color: AppColors.muted, fontSize: 12)),
             const SizedBox(height: 14),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: amounts
-                  .toSet()
-                  .where((a) => a > 0 && a <= state.riderWalletBalance)
+                  .where((a) => a > 0 && a <= balance)
                   .map((a) => SbChip('₱$a', onTap: () {
                         Navigator.pop(context);
-                        state.requestRiderPayout(a, 'GCash');
+                        if (isOwner) {
+                          state.requestOwnerPayout(a, 'GCash');
+                        } else {
+                          state.requestRiderPayout(a, 'GCash');
+                        }
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Payout of ₱$a requested (simulated)')),
                         );

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../data/db_models.dart';
 import '../data/models.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../widgets/common.dart';
+import 'active_rental_screen.dart';
 
 class RentalDetailScreen extends StatelessWidget {
   final RentalVehicle vehicle;
@@ -169,34 +169,55 @@ class RentalDetailScreen extends StatelessWidget {
                     const SizedBox(width: 14),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () {
-                          state.addRentalToHistory(RentalHistoryItem(
-                            id: 'rnh${DateTime.now().microsecondsSinceEpoch}',
-                            vehicleName: vehicle.name,
-                            ownerName: vehicle.ownerName,
-                            startDate: 'Just now',
-                            endDate: 'In 2 days',
-                            totalFare: total,
-                            status: 'Requested',
-                          ));
-                          showDialog(
-                            context: context,
-                            builder: (_) => AlertDialog(
-                              backgroundColor: AppColors.panel,
-                              title: const Text('Rental requested'),
-                              content: Text(
-                                'Your request for the ${vehicle.name} has been sent to ${vehicle.ownerName} (simulated — no backend).',
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text('OK'),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        child: const Text('Request Rental'),
+                        onPressed: state.activeRentalBooking != null
+                            ? null
+                            : () {
+                                state.requestRental(
+                                  vehicleName: vehicle.name,
+                                  vehicleType: vehicle.type,
+                                  icon: vehicle.icon,
+                                  ownerName: vehicle.ownerName,
+                                  ownerInitials: vehicle.ownerInitials,
+                                  pickupLabel: 'Sep 2',
+                                  returnLabel: 'Sep 4',
+                                  days: 2,
+                                  totalFare: total,
+                                );
+                                showDialog(
+                                  context: context,
+                                  builder: (_) => AlertDialog(
+                                    backgroundColor: AppColors.panel,
+                                    title: const Text('Rental requested'),
+                                    content: Text(
+                                      'Your request for the ${vehicle.name} has been sent to ${vehicle.ownerName}. '
+                                      'You\'ll see it as pending on your Home tab while they respond.',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context); // close dialog
+                                          Navigator.pop(context); // close detail screen
+                                          Navigator.pop(context); // close rental list
+                                        },
+                                        child: const Text('Back to Home'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context); // close dialog
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(builder: (_) => const ActiveRentalScreen()),
+                                          );
+                                        },
+                                        child: const Text('View Request'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                        child: Text(
+                          state.activeRentalBooking != null ? 'Rental Already Requested' : 'Request Rental',
+                        ),
                       ),
                     ),
                   ],

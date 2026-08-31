@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../data/models.dart';
 import '../data/db_models.dart';
@@ -286,6 +287,102 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ---- rental booking simulation (passenger) ----
+  // A passenger can only have one open rental request/active rental at a
+  // time in this simulation. It starts as "Pending" the moment they tap
+  // Request Rental, shows up as a card on the Home tab, and — after a
+  // simulated 10s owner-approval delay — flips to "Active" in place.
+  RentalBooking? activeRentalBooking;
+  Timer? _rentalApprovalTimer;
+
+  RentalBooking requestRental({
+    required String vehicleName,
+    required String vehicleType,
+    required IconData icon,
+    required String ownerName,
+    required String ownerInitials,
+    required String pickupLabel,
+    required String returnLabel,
+    required int days,
+    required int totalFare,
+  }) {
+    _rentalApprovalTimer?.cancel();
+    final booking = RentalBooking(
+      id: 'rb${DateTime.now().microsecondsSinceEpoch}',
+      vehicleName: vehicleName,
+      vehicleType: vehicleType,
+      icon: icon,
+      ownerName: ownerName,
+      ownerInitials: ownerInitials,
+      pickupLabel: pickupLabel,
+      returnLabel: returnLabel,
+      days: days,
+      totalFare: totalFare,
+      status: 'Pending',
+      requestedAt: DateTime.now(),
+    );
+    activeRentalBooking = booking;
+    db.rentalHistory.insert(
+      0,
+      RentalHistoryItem(
+        id: booking.id,
+        vehicleName: vehicleName,
+        ownerName: ownerName,
+        startDate: pickupLabel,
+        endDate: returnLabel,
+        totalFare: totalFare,
+        status: 'Requested',
+      ),
+    );
+    notifyListeners();
+
+    _rentalApprovalTimer = Timer(const Duration(seconds: 10), () {
+      if (activeRentalBooking?.id != booking.id) return; // cancelled/replaced
+      booking.status = 'Active';
+      final match = db.rentalHistory.where((r) => r.id == booking.id);
+      if (match.isNotEmpty) {
+        final i = db.rentalHistory.indexOf(match.first);
+        db.rentalHistory[i] = RentalHistoryItem(
+          id: booking.id,
+          vehicleName: vehicleName,
+          ownerName: ownerName,
+          startDate: pickupLabel,
+          endDate: returnLabel,
+          totalFare: totalFare,
+          status: 'Active',
+        );
+      }
+      notifyListeners();
+    });
+    return booking;
+  }
+
+  void cancelRentalBooking() {
+    _rentalApprovalTimer?.cancel();
+    activeRentalBooking = null;
+    notifyListeners();
+  }
+
+  void completeActiveRental() {
+    final booking = activeRentalBooking;
+    if (booking == null) return;
+    final match = db.rentalHistory.where((r) => r.id == booking.id);
+    if (match.isNotEmpty) {
+      final i = db.rentalHistory.indexOf(match.first);
+      db.rentalHistory[i] = RentalHistoryItem(
+        id: booking.id,
+        vehicleName: booking.vehicleName,
+        ownerName: booking.ownerName,
+        startDate: booking.pickupLabel,
+        endDate: booking.returnLabel,
+        totalFare: booking.totalFare,
+        status: 'Completed',
+      );
+    }
+    activeRentalBooking = null;
+    notifyListeners();
+  }
+
   // ---- favorites (toggle helpers) ----
   bool isFavoriteRiderName(String name) =>
       db.favoriteRiders.any((r) => r.name == name);
@@ -379,6 +476,43 @@ class AppState extends ChangeNotifier {
       final vehicle = db.ownerVehicles.where((v) => v.name == request.vehicleName);
       if (vehicle.isNotEmpty) vehicle.first.status = 'Rented';
     }
+    notifyListeners();
+  }
+
+  // ---- vehicle owner fleet management ----
+  void addOwnedVehicle(OwnedVehicle vehicle) {
+    db.ownerVehicles.add(vehicle);
+    notifyListeners();
+  }
+
+  void removeOwnedVehicle(OwnedVehicle vehicle) {
+    db.ownerVehicles.remove(vehicle);
+    notifyListeners();
+  }
+
+  void setOwnedVehicleStatus(OwnedVehicle vehicle, String status) {
+    vehicle.status = status;
+    notifyListeners();
+  }
+
+  // ---- vehicle owner wallet ----
+  int get ownerWalletBalance => db.ownerWalletBalance;
+  List<WalletTransaction> get ownerTransactions => db.ownerTransactions;
+
+  void requestOwnerPayout(int amount, String method) {
+    if (amount > db.ownerWalletBalance) return;
+    db.ownerWalletBalance -= amount;
+    db.ownerTransactions.insert(
+      0,
+      WalletTransaction(
+        id: 'owt${DateTime.now().microsecondsSinceEpoch}',
+        type: 'payout',
+        title: 'Payout to $method',
+        amount: amount,
+        date: 'Just now',
+        status: 'Processing',
+      ),
+    );
     notifyListeners();
   }
 }

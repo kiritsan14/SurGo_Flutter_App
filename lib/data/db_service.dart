@@ -33,6 +33,8 @@ class DbService {
   late List<WalletTransaction> passengerTransactions;
   late int riderWalletBalance;
   late List<WalletTransaction> riderTransactions;
+  late int ownerWalletBalance;
+  late List<WalletTransaction> ownerTransactions;
 
   late List<PaymentMethodItem> paymentMethods;
   late List<SavedPlace> savedPlaces;
@@ -96,6 +98,10 @@ class DbService {
     riderWalletBalance = rw['balance'];
     riderTransactions =
         (rw['transactions'] as List).map((e) => WalletTransaction.fromJson(e)).toList();
+    final ow = wallet['owner'] as Map<String, dynamic>? ?? const {'balance': 0, 'transactions': []};
+    ownerWalletBalance = ow['balance'] ?? 0;
+    ownerTransactions =
+        (ow['transactions'] as List).map((e) => WalletTransaction.fromJson(e)).toList();
 
     paymentMethods =
         (j['paymentMethods'] as List).map((e) => PaymentMethodItem.fromJson(e)).toList();

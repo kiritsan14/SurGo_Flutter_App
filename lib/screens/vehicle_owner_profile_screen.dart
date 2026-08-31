@@ -9,6 +9,7 @@ import 'emergency_contacts_screen.dart';
 import 'vehicle_documents_screen.dart';
 import 'vehicle_owner_bookings_screen.dart';
 import 'vehicle_owner_earnings_screen.dart';
+import 'wallet_screen.dart';
 
 class VehicleOwnerProfileScreen extends StatelessWidget {
   final bool embedded;
@@ -71,6 +72,17 @@ class VehicleOwnerProfileScreen extends StatelessWidget {
                       color: AppColors.secondaryLight,
                       onTap: () => Navigator.push(
                           context, MaterialPageRoute(builder: (_) => const VehicleOwnerEarningsScreen(embedded: false))),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _quickAction(
+                      context,
+                      icon: Icons.account_balance_wallet_outlined,
+                      label: 'Cash Out',
+                      color: AppColors.primaryLight,
+                      onTap: () => Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => const WalletScreen(isOwner: true, embedded: false))),
                     ),
                   ),
                   const SizedBox(width: 8),

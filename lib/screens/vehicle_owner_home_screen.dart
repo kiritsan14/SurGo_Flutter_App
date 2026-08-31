@@ -3,6 +3,7 @@ import '../data/db_models.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../widgets/common.dart';
+import 'vehicle_owner_vehicles_screen.dart';
 
 /// Vehicle Owner mode — Home tab. Shows the owner's fleet at a glance and
 /// any incoming rental booking requests that need a response.
@@ -48,7 +49,20 @@ class VehicleOwnerHomeScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            const Text('My Fleet', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('My Fleet', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
+                GestureDetector(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const VehicleOwnerVehiclesScreen(embedded: false)),
+                  ),
+                  child: const Text('Manage',
+                      style: TextStyle(color: AppColors.primaryLight, fontSize: 12, fontWeight: FontWeight.w700)),
+                ),
+              ],
+            ),
             const SizedBox(height: 10),
             ...state.ownerVehicles.map(
               (v) => Padding(

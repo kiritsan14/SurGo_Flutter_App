@@ -600,6 +600,7 @@ class OwnedVehicle {
   final String id;
   final String name;
   final String type;
+  final String category; // 2-Wheel, 3-Wheel, 4-Wheel, Truck
   final String plate;
   final int pricePerDay;
   String status; // Listed, Rented, Maintenance
@@ -610,6 +611,7 @@ class OwnedVehicle {
     required this.id,
     required this.name,
     required this.type,
+    required this.category,
     required this.plate,
     required this.pricePerDay,
     required this.status,
@@ -621,6 +623,7 @@ class OwnedVehicle {
         id: j['id'],
         name: j['name'],
         type: j['type'],
+        category: j['category'] ?? categoryForType(j['type']),
         plate: j['plate'],
         pricePerDay: j['pricePerDay'],
         status: j['status'],
@@ -628,15 +631,42 @@ class OwnedVehicle {
         totalRentals: j['totalRentals'],
       );
 
-  IconData get icon {
+  /// Best-guess category for vehicles that predate the `category` field.
+  static String categoryForType(String type) {
     switch (type) {
       case 'Motorcycle':
-        return Icons.two_wheeler;
-      case 'Multicab':
-      case 'Van':
-        return Icons.airport_shuttle;
+      case 'Scooter':
+      case 'E-bike':
+        return '2-Wheel';
+      case 'Tricycle':
+        return '3-Wheel';
+      case 'Truck':
+      case 'Pickup':
+        return 'Truck';
       default:
-        return Icons.directions_car;
+        return '4-Wheel';
+    }
+  }
+
+  static const categories = ['2-Wheel', '3-Wheel', '4-Wheel', 'Truck'];
+
+  static const typesByCategory = {
+    '2-Wheel': ['Motorcycle', 'Scooter', 'E-bike'],
+    '3-Wheel': ['Tricycle'],
+    '4-Wheel': ['Car', 'Sedan', 'SUV', 'Van', 'Multicab'],
+    'Truck': ['Truck', 'Pickup'],
+  };
+
+  IconData get icon {
+    switch (category) {
+      case '2-Wheel':
+        return Icons.two_wheeler;
+      case '3-Wheel':
+        return Icons.electric_rickshaw;
+      case 'Truck':
+        return Icons.local_shipping_outlined;
+      default:
+        return type == 'Van' || type == 'Multicab' ? Icons.airport_shuttle : Icons.directions_car;
     }
   }
 }
