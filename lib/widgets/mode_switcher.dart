@@ -12,12 +12,12 @@ class _ModeInfo {
 
 const _modes = [
   _ModeInfo(UserMode.passenger, 'Passenger', Icons.person_outline, '/home'),
-  _ModeInfo(UserMode.rider, 'Rider', Icons.electric_rickshaw, '/rider'),
+  _ModeInfo(UserMode.earner, 'Earner', Icons.electric_rickshaw, '/earner'),
   _ModeInfo(UserMode.vehicleOwner, 'Vehicle Owner', Icons.directions_car_filled_outlined, '/owner'),
 ];
 
 /// A dropdown menu (not a simple on/off switch) that lets the user pick
-/// between all 3 account modes: Passenger, Rider, and Vehicle Owner.
+/// between all 3 account modes: Passenger, Earner, and Vehicle Owner.
 /// Used on every Profile tab so switching is always one tap away.
 class SbModeSwitcher extends StatelessWidget {
   const SbModeSwitcher({super.key});
@@ -25,7 +25,12 @@ class SbModeSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = AppState.instance;
-    final current = _modes.firstWhere((m) => m.mode == state.mode);
+    // Only the roles this account actually holds; a passenger-only account must
+    // not be offered an Earner or Vehicle Owner shell it cannot fill.
+    final modes =
+        _modes.where((m) => state.availableModes.contains(m.mode)).toList();
+    final current = modes.firstWhere((m) => m.mode == state.mode,
+        orElse: () => modes.first);
 
     return PopupMenuButton<_ModeInfo>(
       color: AppColors.panel2,
@@ -39,7 +44,7 @@ class SbModeSwitcher extends StatelessWidget {
         state.switchToMode(picked.mode);
         Navigator.pushNamedAndRemoveUntil(context, picked.route, (r) => false);
       },
-      itemBuilder: (context) => _modes
+      itemBuilder: (context) => modes
           .map(
             (m) => PopupMenuItem(
               value: m,

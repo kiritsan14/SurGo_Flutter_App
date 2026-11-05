@@ -16,8 +16,14 @@ void main() {
     await tester.pumpWidget(const SurGoApp());
 
     // The splash screen renders the SurGo wordmark (as a single RichText
-    // made of the 'SUR' + 'GO' spans) and the tagline below it.
-    expect(find.text('SURGO'), findsOneWidget);
-    expect(find.text('Ride. Rent. Go.'), findsOneWidget);
+    // made of the 'SUR' + 'GO' spans) and the tagline below it. findRichText
+    // is required so the two spans are matched as the combined string.
+    expect(find.text('SURGO', findRichText: true), findsOneWidget);
+    expect(find.text('Ride. Rent. Errand.'), findsOneWidget);
+
+    // Let the splash bootstrap timer elapse so it hands off to /login and no
+    // timer outlives the widget tree.
+    await tester.pump(const Duration(milliseconds: 1600));
+    await tester.pumpAndSettle();
   });
 }

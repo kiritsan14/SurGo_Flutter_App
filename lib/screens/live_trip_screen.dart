@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/db_models.dart';
 import '../data/db_service.dart';
+import '../services/money.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../widgets/common.dart';
@@ -56,37 +57,74 @@ class LiveTripScreen extends StatelessWidget {
     final state = AppState.instance;
     final db = DbService.instance;
     final activeRide = state.activeRide;
-    final rider = db.rider;
-    final passenger = activeRide != null
-        ? (db.mapPassengers
-                .where((p) =>
-                    p.id == activeRide.passengerId ||
-                    p.name == activeRide.passengerName)
-                .isNotEmpty
-            ? db.mapPassengers.firstWhere((p) =>
-                p.id == activeRide.passengerId ||
-                p.name == activeRide.passengerName)
-            : db.mapPassengers.first)
-        : db.mapPassengers.first;
+    final earner = db.earner;
+    MapPassenger? matchById;
+    MapPassenger? matchByName;
+    if (activeRide != null) {
+      for (final p in db.mapPassengers) {
+        if (p.id == activeRide.passengerId) {
+          matchById = p;
+          break;
+        }
+      }
+      for (final p in db.mapPassengers) {
+        if (p.name == activeRide.passengerName) {
+          matchByName = p;
+          break;
+        }
+      }
+    }
+    final passenger = matchById ??
+        matchByName ??
+        (activeRide == null && db.mapPassengers.isNotEmpty
+            ? db.mapPassengers.first
+            : null);
+    if (passenger == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Live Trip')),
+        body: const Center(child: Text('No passenger selected yet.')),
+      );
+    }
 
     final rideMatch = activeRide != null
         ? db.mapRideRequests
             .where((request) =>
-                request.passengerId == activeRide.passengerId ||
-                request.id == activeRide.id)
+                request.id == activeRide.id ||
+                (activeRide.passengerId != null &&
+                    request.passengerId == activeRide.passengerId))
             .toList()
         : <MapRideRequest>[];
     final matchedRequest = rideMatch.isNotEmpty ? rideMatch.first : null;
 
-    final driverPosition = db.mapRiders.isNotEmpty
-        ? db.mapRiders.first.position
-        : db.mapConfig.defaultCenter;
-    final pickupPoint = matchedRequest?.pickup ?? passenger.position;
-    final destinationPoint = matchedRequest != null
-        ? MapPoint(
-            passenger.position.latitude + 0.0032,
-            passenger.position.longitude + 0.0045,
-          )
+    MapRider? assignedRider;
+    for (final r in db.mapRiders) {
+      if (activeRide?.riderId != null && r.id == activeRide!.riderId) {
+        assignedRider = r;
+        break;
+      }
+    }
+    // The trip belongs to whoever the matching actually assigned, not the
+    // signed-in earner - all three roles run on the same account, so the
+    // signed-in earner is frequently not the driver. Fall back to the earner
+    // only while nothing is assigned, so the card is never blank.
+    final driverName = assignedRider?.name ?? earner.name;
+    final driverInitials = assignedRider?.initials ?? earner.initials;
+    final driverModel = assignedRider?.vehicleModel ?? earner.vehicleModel;
+    final driverVehicleLabel = assignedRider != null
+        ? '${assignedRider.vehicleType} · ${assignedRider.vehiclePlate}'
+        : '${earner.vehicleType} · ${earner.vehiclePlate}';
+    final driverRating = assignedRider?.rating ?? earner.rating;
+    final driverTrips = assignedRider?.totalTrips ?? earner.totalTrips;
+    final driverPosition = (assignedRider ??
+            (db.mapRiders.isNotEmpty ? db.mapRiders.first : null))
+        ?.position ??
+        db.mapConfig.defaultCenter;
+    final pickupPoint = matchedRequest?.pickup ??
+        (activeRide?.pickupLatitude != null
+            ? MapPoint(activeRide!.pickupLatitude!, activeRide.pickupLongitude!)
+            : passenger.position);
+    final destinationPoint = activeRide?.dropoffLatitude != null
+        ? MapPoint(activeRide!.dropoffLatitude!, activeRide.dropoffLongitude!)
         : driverPosition;
 
     final markers = <SurgoMapMarker>[
@@ -95,10 +133,10 @@ class LiveTripScreen extends StatelessWidget {
         position: driverPosition,
         icon: surgoMarkerIcon('motorcycle'),
         title: 'You',
-        subtitle: '${rider.vehicleType} · ${rider.vehiclePlate}',
+        subtitle: driverVehicleLabel,
         details: [
-          MapEntry('Name', rider.name),
-          MapEntry('Vehicle', rider.vehicleModel),
+          MapEntry('Name', driverName),
+          MapEntry('Vehicle', driverModel),
         ],
       ),
       SurgoMapMarker(
@@ -111,7 +149,7 @@ class LiveTripScreen extends StatelessWidget {
             : '${passenger.barangay} · ${passenger.purok}',
         details: [
           MapEntry('Pick-up', activeRide?.pickup ?? passenger.barangay),
-          MapEntry('Fare', '₱${activeRide?.fare ?? 0}'),
+          MapEntry('Fare', Money.format(activeRide?.fare ?? 0)),
         ],
       ),
       SurgoMapMarker(
@@ -209,7 +247,7 @@ class LiveTripScreen extends StatelessWidget {
                               secondary: true,
                             ),
                             Text(
-                              '${rider.vehicleType} · ${rider.vehiclePlate}',
+                              driverVehicleLabel,
                               style: const TextStyle(
                                   color: AppColors.muted, fontSize: 11.5),
                             ),
@@ -218,18 +256,18 @@ class LiveTripScreen extends StatelessWidget {
                         const SizedBox(height: 14),
                         Row(
                           children: [
-                            SbAvatar(initials: rider.initials),
+                            SbAvatar(initials: driverInitials),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(rider.name,
+                                  Text(driverName,
                                       style: const TextStyle(
                                           fontWeight: FontWeight.w800,
                                           fontSize: 14)),
                                   Text(
-                                      '⭐ ${rider.rating} · ${rider.totalTrips} trips',
+                                      '⭐ $driverRating · $driverTrips trips',
                                       style: const TextStyle(
                                           color: AppColors.muted,
                                           fontSize: 11.5)),
@@ -240,18 +278,21 @@ class LiveTripScreen extends StatelessWidget {
                               icon: Icons.call_outlined,
                               onTap: () =>
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Call ${rider.name}')),
+                                SnackBar(content: Text('Call $driverName')),
                               ),
                             ),
                             const SizedBox(width: 8),
                             SbIconButton(
                               icon: Icons.message_outlined,
-                              onTap: () =>
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text(
-                                        'Chat is not wired up in this simulation')),
-                              ),
+                              // Gated by the ride's own status, not by whether
+                              // a trip happens to be on screen: the chat screen
+                              // explains itself when the thread is closed, so a
+                              // tap is never a dead end.
+                              onTap: () => Navigator.pushNamed(
+                                  context, '/ride_chat'),
+                              color: state.canChatOnRide
+                                  ? AppColors.primaryLight
+                                  : AppColors.muted2,
                             ),
                           ],
                         ),
@@ -269,8 +310,20 @@ class LiveTripScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   SbPrimaryButton(
                     label: 'Complete Trip',
-                    onPressed: () =>
-                        Navigator.pushReplacementNamed(context, '/rate'),
+                    onPressed: () {
+                      // Settle before showing the receipt: the rating screen
+                      // reads the completed ride and its fare from state. A
+                      // trip that is not in progress cannot settle, so say so
+                      // instead of opening the previous trip's receipt.
+                      if (!state.completeActiveRide()) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('The trip cannot be completed yet.')),
+                        );
+                        return;
+                      }
+                      Navigator.pushReplacementNamed(context, '/rate');
+                    },
                   ),
                 ],
               ),

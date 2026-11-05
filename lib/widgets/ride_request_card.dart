@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../data/db_models.dart';
 import '../data/db_service.dart';
+import '../services/money.dart';
 import '../state/app_state.dart';
+import '../state/ride_status.dart';
 import '../theme/app_colors.dart';
 import 'common.dart';
 import 'surgo_map.dart';
@@ -76,7 +79,7 @@ class _SbRideRequestCardState extends State<SbRideRequestCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('₱${r.fare}',
+              Text(Money.format(r.fare),
                   style: const TextStyle(
                       fontWeight: FontWeight.w800,
                       color: AppColors.primaryLight)),
@@ -243,8 +246,8 @@ class _SbRideRequestCardState extends State<SbRideRequestCard> {
 }
 
 /// The banner that appears above "Incoming Requests" once the rider has
-/// accepted a ride — a purple/green highlight card showing the active trip
-/// with quick actions to complete or cancel it.
+/// accepted a ride — a purple/green highlight card showing the active trip,
+/// labelled with whatever the trip needs next, plus a cancel escape hatch.
 class SbActiveRideBanner extends StatelessWidget {
   final RideRequestItem ride;
   const SbActiveRideBanner({super.key, required this.ride});
@@ -292,7 +295,7 @@ class SbActiveRideBanner extends StatelessWidget {
                         fontSize: 11,
                         letterSpacing: 0.6)),
                 const Spacer(),
-                Text('₱${ride.fare}',
+                Text(Money.format(ride.fare),
                     style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w800,
@@ -342,24 +345,37 @@ class SbActiveRideBanner extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: AppColors.onAccent,
-                      padding: const EdgeInsets.symmetric(vertical: 11),
+                // The label comes from the enum, so the button cannot offer an
+                // action the trip is not actually in. [completeActiveRide] is
+                // the only step that pays, and it only settles from
+                // [RideStatus.inProgress]; treating every press as "complete"
+                // is what let this button announce a fare was added while the
+                // guard had silently refused the transition.
+                if (ride.status.advanceActionLabel != null)
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: AppColors.onAccent,
+                        padding: const EdgeInsets.symmetric(vertical: 11),
+                      ),
+                      onPressed: () {
+                        if (ride.status == RideStatus.inProgress) {
+                          state.completeActiveRide();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'Trip completed — fare added to your wallet (simulated)')),
+                          );
+                        } else {
+                          state.advanceRide();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(ride.status.label)));
+                        }
+                      },
+                      child: Text(ride.status.advanceActionLabel!),
                     ),
-                    onPressed: () {
-                      state.completeActiveRide();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text(
-                                'Trip completed — fare added to your wallet (simulated)')),
-                      );
-                    },
-                    child: const Text('Complete Trip'),
                   ),
-                ),
               ],
             ),
           ],

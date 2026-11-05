@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/db_models.dart';
 import '../data/db_service.dart';
+import '../services/money.dart';
 import '../theme/app_colors.dart';
 import '../widgets/common.dart';
 import '../widgets/surgo_map.dart';
@@ -13,8 +14,8 @@ import '../widgets/surgo_map.dart';
 /// real request still happens on the Home tab's request list (Map V1 keeps
 /// the two mock datasets — visualization vs. the accept/decline flow —
 /// separate rather than faking a link between unrelated mock IDs).
-class RiderMapScreen extends StatelessWidget {
-  const RiderMapScreen({super.key});
+class EarnerMapScreen extends StatelessWidget {
+  const EarnerMapScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +35,7 @@ class RiderMapScreen extends StatelessWidget {
           if (req != null) ...[
             MapEntry('Wants', _titleCase(req.preferredVehicleType)),
             MapEntry('Distance', '${req.estimatedDistanceKm.toStringAsFixed(1)} km'),
-            MapEntry('Est. fare', '₱${req.estimatedFare}'),
+            MapEntry('Est. fare', Money.format(req.estimatedFare)),
             MapEntry('Drop-off', '${req.destinationPurok}, ${req.destinationBarangay}'),
             MapEntry('Payment', _titleCase(req.paymentMethod)),
           ] else

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/db_service.dart';
+import '../services/money.dart';
 import '../theme/app_colors.dart';
 import '../widgets/common.dart';
 import '../widgets/surgo_map.dart';
@@ -13,12 +14,8 @@ class VehicleOwnerMapScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final db = DbService.instance;
-    var ownerVehicles =
+    final ownerVehicles =
         db.mapRentalVehicles.where((v) => v.ownerId == db.vehicleOwner.id).toList();
-    // The bundled Map V1 mock data ships with one fixed owner id — fall
-    // back to showing every listed rental vehicle so the map still has
-    // something to show even if a different mock_database.json is used.
-    if (ownerVehicles.isEmpty) ownerVehicles = db.mapRentalVehicles;
 
     final markers = ownerVehicles
         .map((v) => SurgoMapMarker(
@@ -29,8 +26,8 @@ class VehicleOwnerMapScreen extends StatelessWidget {
               subtitle: '${_titleCase(v.vehicleType)} · ${v.purok}, ${v.barangay}',
               faded: !v.available,
               details: [
-                MapEntry('Per day', '₱${v.pricePerDay}'),
-                MapEntry('Per hour', '₱${v.pricePerHour}'),
+                MapEntry('Per day', Money.format(v.pricePerDay)),
+                MapEntry('Per hour', Money.format(v.pricePerHour)),
                 MapEntry('Rating', '⭐ ${v.rating.toStringAsFixed(1)}'),
                 MapEntry('Status', v.available ? 'Available' : 'Currently rented'),
               ],

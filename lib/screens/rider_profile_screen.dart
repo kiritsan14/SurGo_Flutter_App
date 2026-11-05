@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../data/db_models.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_shell.dart';
@@ -10,10 +11,12 @@ import 'rider_earnings_screen.dart';
 import 'rider_trips_screen.dart';
 import 'vehicle_documents_screen.dart';
 import 'wallet_screen.dart';
+import 'verification_screen.dart';
+import '../widgets/verification_tile.dart';
 
-class RiderProfileScreen extends StatelessWidget {
+class EarnerProfileScreen extends StatelessWidget {
   final bool embedded;
-  const RiderProfileScreen({super.key, this.embedded = true});
+  const EarnerProfileScreen({super.key, this.embedded = true});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +24,7 @@ class RiderProfileScreen extends StatelessWidget {
     final body = ListenableBuilder(
       listenable: state,
       builder: (context, _) {
-        final rider = state.db.rider;
+        final earner = state.db.earner;
         return SafeArea(
           bottom: false,
           child: ListView(
@@ -31,20 +34,25 @@ class RiderProfileScreen extends StatelessWidget {
               Center(
                 child: Column(
                   children: [
-                    SbAvatar(initials: rider.initials, size: 64),
+                    SbAvatar(initials: earner.initials, size: 64),
                     const SizedBox(height: 10),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(rider.name, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
-                        if (rider.verified) ...[
+                        Text(earner.name,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w800, fontSize: 16)),
+                        if (earner.verified) ...[
                           const SizedBox(width: 6),
-                          const Icon(Icons.verified, size: 16, color: AppColors.secondaryLight),
+                          const Icon(Icons.verified,
+                              size: 16, color: AppColors.secondaryLight),
                         ],
                       ],
                     ),
-                    Text('⭐ ${rider.rating} · ${rider.totalTrips} trips · Since ${rider.memberSince}',
-                        style: const TextStyle(color: AppColors.muted, fontSize: 12)),
+                    Text(
+                        '⭐ ${earner.rating} · ${earner.totalTrips} trips · Since ${earner.memberSince}',
+                        style: const TextStyle(
+                            color: AppColors.muted, fontSize: 12)),
                   ],
                 ),
               ),
@@ -52,23 +60,28 @@ class RiderProfileScreen extends StatelessWidget {
               SbCard(
                 child: Row(
                   children: [
-                    const Icon(Icons.two_wheeler, color: AppColors.secondaryLight, size: 22),
+                    const Icon(Icons.two_wheeler,
+                        color: AppColors.secondaryLight, size: 22),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('${rider.vehicleType} · ${rider.vehicleModel}',
-                              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
-                          Text('Plate ${rider.vehiclePlate}',
-                              style: const TextStyle(color: AppColors.muted, fontSize: 11)),
+                          Text('${earner.vehicleType} · ${earner.vehicleModel}',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 12.5)),
+                          Text('Plate ${earner.vehiclePlate}',
+                              style: const TextStyle(
+                                  color: AppColors.muted, fontSize: 11)),
                         ],
                       ),
                     ),
-                    SbTag(rider.documentsStatus, secondary: true),
+                    SbTag(earner.documentsStatus, secondary: true),
                   ],
                 ),
               ),
+              const SizedBox(height: 18),
+              _capabilitySection(context, state),
               const SizedBox(height: 18),
               Row(
                 children: [
@@ -78,7 +91,10 @@ class RiderProfileScreen extends StatelessWidget {
                       icon: Icons.receipt_long,
                       label: 'My Trips',
                       color: AppColors.primaryLight,
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RiderTripsScreen())),
+                      onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const RiderTripsScreen())),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -88,7 +104,10 @@ class RiderProfileScreen extends StatelessWidget {
                       icon: Icons.bar_chart_rounded,
                       label: 'Earnings',
                       color: AppColors.secondaryLight,
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RiderEarningsScreen())),
+                      onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const RiderEarningsScreen())),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -98,21 +117,40 @@ class RiderProfileScreen extends StatelessWidget {
                       icon: Icons.account_balance_wallet_outlined,
                       label: 'Wallet',
                       color: AppColors.muted,
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WalletScreen(isRider: true))),
+                      onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) =>
+                                  const WalletScreen(isRider: true))),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 20),
               _settingsRow(context, 'Vehicle Documents',
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VehicleDocumentsScreen()))),
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const VehicleDocumentsScreen()))),
+              const SizedBox(height: 8),
+              VerificationStatusRow(
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const VerificationScreen()))),
               const SizedBox(height: 8),
               _settingsRow(context, 'Emergency Contacts',
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EmergencyContactsScreen()))),
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const EmergencyContactsScreen()))),
               const SizedBox(height: 8),
               _settingsRow(context, 'Account Settings',
                   onTap: () => Navigator.push(
-                      context, MaterialPageRoute(builder: (_) => const AccountSettingsScreen(isRider: true)))),
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) =>
+                              const AccountSettingsScreen(isRider: true)))),
               const SizedBox(height: 20),
               const SbModeSwitcher(),
             ],
@@ -124,8 +162,88 @@ class RiderProfileScreen extends StatelessWidget {
     return Scaffold(body: body);
   }
 
+  /// The toggle that makes the Earner role mean something: an earner who only
+  /// drives sees no errands. Refusals come from the model, not from this screen
+  /// - [AppState.setEarnerCapability] returns false when the change would leave
+  /// the earner with nothing on, and the snackbar explains that instead of
+  /// leaving a switch that looks stuck.
+  Widget _capabilitySection(BuildContext context, AppState state) {
+    final earner = state.earner;
+    return SbCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.work_outline,
+                  color: AppColors.primaryLight, size: 18),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text('What I offer',
+                    style:
+                        TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+              ),
+              SbTag('${earner.activeCapabilities.length} on', secondary: true),
+            ],
+          ),
+          const SizedBox(height: 4),
+          const Text(
+              'Errands and deliveries only appear here when switched on.',
+              style: TextStyle(color: AppColors.muted, fontSize: 11)),
+          const SizedBox(height: 6),
+          for (final capability in EarnerCapability.values) ...[
+            _capabilityRow(context, state, capability),
+            if (capability != EarnerCapability.values.last)
+              const Divider(height: 16, color: AppColors.border),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _capabilityRow(
+      BuildContext context, AppState state, EarnerCapability capability) {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(capability.label,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w700, fontSize: 12.5)),
+              const SizedBox(height: 2),
+              Text(capability.hint,
+                  style: const TextStyle(color: AppColors.muted, fontSize: 11)),
+            ],
+          ),
+        ),
+        Switch(
+          value: state.acceptsCapability(capability),
+          activeColor: Colors.white,
+          activeTrackColor: AppColors.secondary,
+          inactiveTrackColor: AppColors.panel2,
+          onChanged: (value) {
+            final changed = state.setEarnerCapability(capability, value);
+            if (!changed) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                      'Keep at least one on - switch on another before turning off ${capability.label.toLowerCase()}.'),
+                ),
+              );
+            }
+          },
+        ),
+      ],
+    );
+  }
+
   Widget _quickAction(BuildContext context,
-      {required IconData icon, required String label, required Color color, VoidCallback? onTap}) {
+      {required IconData icon,
+      required String label,
+      required Color color,
+      VoidCallback? onTap}) {
     return SbCard(
       padding: const EdgeInsets.symmetric(vertical: 12),
       onTap: onTap,
@@ -133,20 +251,26 @@ class RiderProfileScreen extends StatelessWidget {
         children: [
           Icon(icon, size: 18, color: color),
           const SizedBox(height: 6),
-          Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700)),
+          Text(label,
+              textAlign: TextAlign.center,
+              style:
+                  const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700)),
         ],
       ),
     );
   }
 
-  Widget _settingsRow(BuildContext context, String label, {VoidCallback? onTap}) {
+  Widget _settingsRow(BuildContext context, String label,
+      {VoidCallback? onTap}) {
     return SbCard(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       onTap: onTap,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+          Text(label,
+              style:
+                  const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
           const Icon(Icons.chevron_right, size: 16, color: AppColors.muted),
         ],
       ),

@@ -1,3 +1,4 @@
+# Dart / Flutter
 .dart_tool/
 .packages
 build/
@@ -5,5 +6,25 @@ build/
 .flutter-plugins-dependencies
 *.iml
 .idea/
+.vscode/
+
+# Platform build artifacts
 ios/Flutter/
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/ephemeral/
 android/.gradle/
+android/local.properties
+macos/Flutter/ephemeral/
+
+# Tests / coverage
+coverage/
+
+# Vercel CLI project link
+.vercel/
+
+# OS
+.DS_Store
+Thumbs.db
+.vercel
+.env*

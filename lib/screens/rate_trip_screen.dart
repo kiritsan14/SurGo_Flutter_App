@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../data/db_models.dart';
-import '../data/models.dart';
+import '../services/money.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../widgets/common.dart';
@@ -13,7 +12,6 @@ class RateTripScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = AppState.instance;
-    final driver = MockData.matchedDriver;
 
     return Scaffold(
       body: SafeArea(
@@ -21,6 +19,22 @@ class RateTripScreen extends StatelessWidget {
           child: ListenableBuilder(
             listenable: state,
             builder: (context, _) {
+              // The trip was settled before this screen opened, so the rider,
+              // fare and route come from that receipt rather than from
+              // MockData or the booking draft.
+              final ride = state.lastCompletedRide;
+              final driver = state.lastCompletedRideDriver;
+              if (ride == null || driver == null) {
+                return const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Text(
+                    'No completed trip to rate yet.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: AppColors.muted, fontSize: 13),
+                  ),
+                );
+              }
+
               final isFavorite = state.isFavoriteRiderName(driver.name);
               return SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -68,6 +82,11 @@ class RateTripScreen extends StatelessWidget {
                         style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
                     const SizedBox(height: 4),
                     Text(
+                      '${driver.vehicleType} · ${Money.format(ride.fare)}',
+                      style: const TextStyle(color: AppColors.muted, fontSize: 11.5),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
                       isFavorite ? 'Added to your favorite riders' : 'Tap the heart to save as a favorite rider',
                       style: const TextStyle(color: AppColors.muted, fontSize: 11),
                     ),
@@ -106,16 +125,9 @@ class RateTripScreen extends StatelessWidget {
                     SbPrimaryButton(
                       label: 'Submit Rating',
                       onPressed: () {
-                        state.addRideToHistory(RideHistoryItem(
-                          id: 'rh${DateTime.now().microsecondsSinceEpoch}',
-                          route: '${state.pickupLabel} → ${state.destinationLabel}',
-                          date: 'Just now',
-                          fare: state.selectedRide.fare,
-                          status: 'Completed',
-                          vehicleType: driver.vehicleType,
-                          driverName: driver.name,
-                          rating: state.tripRating,
-                        ));
+                        // completeActiveRide already wrote the history row; the
+                        // rating updates it in place instead of adding a second.
+                        state.rateCompletedRide(state.tripRating);
                         // reset for the next trip
                         state.setTripRating(4);
                         Navigator.pushNamedAndRemoveUntil(

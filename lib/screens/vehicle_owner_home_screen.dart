@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../data/db_models.dart';
+import '../services/money.dart';
 import '../state/app_state.dart';
+import '../state/rental_status.dart';
 import '../theme/app_colors.dart';
 import '../widgets/common.dart';
 import 'vehicle_owner_vehicles_screen.dart';
@@ -19,10 +21,10 @@ class VehicleOwnerHomeScreen extends StatelessWidget {
       builder: (context, _) {
         final owner = state.db.vehicleOwner;
         final pending = state.ownerBookingRequests
-            .where((b) => b.status == 'Pending')
+            .where((b) => b.status.isPending)
             .toList();
         final activeRentals = state.ownerBookingRequests
-            .where((b) => b.status == 'Accepted')
+            .where((b) => b.status == RentalStatus.accepted)
             .toList();
         return ListView(
           padding: const EdgeInsets.fromLTRB(18, 8, 18, 90),
@@ -54,11 +56,11 @@ class VehicleOwnerHomeScreen extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                    child: _statBox('₱${state.ownerEarningsToday}', 'Today')),
+                    child: _statBox(Money.format(state.ownerEarningsToday), 'Today')),
                 const SizedBox(width: 8),
                 Expanded(
                     child:
-                        _statBox('₱${state.ownerEarningsWeek}', 'This Week')),
+                        _statBox(Money.format(state.ownerEarningsWeek), 'This Week')),
                 const SizedBox(width: 8),
                 Expanded(
                     child:
@@ -114,7 +116,7 @@ class VehicleOwnerHomeScreen extends StatelessWidget {
                                 style: const TextStyle(
                                     fontWeight: FontWeight.w800,
                                     fontSize: 12.5)),
-                            Text('Plate ${v.plate} · ₱${v.pricePerDay}/day',
+                            Text('Plate ${v.plate} · ${Money.format(v.pricePerDay)}/day',
                                 style: const TextStyle(
                                     color: AppColors.muted, fontSize: 11)),
                           ],
@@ -204,7 +206,7 @@ class VehicleOwnerHomeScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('₱${b.totalFare}',
+              Text(Money.format(b.totalFare),
                   style: const TextStyle(
                       fontWeight: FontWeight.w800,
                       color: AppColors.primaryLight)),

@@ -1,10 +1,11 @@
 name: surgo
-description: "SurGo — Ride. Rent. Go. Offline UI simulation (no backend, mock data only)"
+description: "SurGo — Ride. Rent. Errand. A multi-service mobility and delivery prototype (rides, vehicle rentals, Pasuyo errands) with an in-app platform fee ledger."
 publish_to: 'none'
-version: 0.1.0
 
+# The project targets the Flutter 3.24+ stable line. Raise the lower bound if
+# you upgrade past this and confirm with `flutter analyze` first.
 environment:
-  sdk: '>=3.3.0 <4.0.0'
+  sdk: '>=3.5.0 <4.0.0'
 
 dependencies:
   flutter:
@@ -13,15 +14,27 @@ dependencies:
   flutter_map: ^7.0.2
   latlong2: ^0.9.1
   geolocator: ^13.0.1
-  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
 
 flutter:
   uses-material-design: true
   assets:
-    - assets/db/mock_database.json
+    # Seed data is split by domain; assets/db/manifest.json declares the load
+    # order and is the place to add a new domain file.
+    - assets/db/manifest.json
+    - assets/db/config.json
+    - assets/db/users.json
+    - assets/db/accounts.json
+    - assets/db/applications.json
+    - assets/db/locations.json
+    - assets/db/vehicles.json
+    - assets/db/rides.json
+    - assets/db/rentals.json
+    - assets/db/pasuyo.json
+    - assets/db/wallets.json
+    - assets/db/earnings.json
     - assets/data/surgo_map_v1_mock_data.json

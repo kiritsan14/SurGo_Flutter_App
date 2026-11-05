@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../data/db_models.dart';
+import '../services/money.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_shell.dart';
@@ -19,9 +21,9 @@ class WalletScreen extends StatelessWidget {
       listenable: state,
       builder: (context, _) {
         final balance =
-            isOwner ? state.ownerWalletBalance : (isRider ? state.riderWalletBalance : state.passengerWalletBalance);
+            isOwner ? state.ownerWalletBalance : (isRider ? state.earnerWalletBalance : state.passengerWalletBalance);
         final txns =
-            isOwner ? state.ownerTransactions : (isRider ? state.riderTransactions : state.passengerTransactions);
+            isOwner ? state.ownerTransactions : (isRider ? state.earnerTransactions : state.passengerTransactions);
         final title = isOwner ? 'Owner Wallet' : (isRider ? 'Earnings Wallet' : 'Wallet');
         return ListView(
           padding: EdgeInsets.fromLTRB(18, embedded ? 0 : 14, 18, embedded ? 90 : 24),
@@ -43,7 +45,7 @@ class WalletScreen extends StatelessWidget {
                     Text(isPayout ? 'Available for payout' : 'Wallet balance',
                         style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 6),
-                    Text('₱$balance',
+                    Text(Money.format(balance),
                         style: const TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w800)),
                     const SizedBox(height: 16),
                     Row(
@@ -52,8 +54,11 @@ class WalletScreen extends StatelessWidget {
                           child: SbPrimaryButton(
                             label: isPayout ? 'Cash Out' : 'Top Up',
                             icon: isPayout ? Icons.account_balance_wallet : Icons.add_card,
-                            onPressed: () =>
-                                isPayout ? _showPayoutSheet(context, state, balance) : _showTopUpSheet(context, state),
+                            onPressed: isPayout && balance < state.minimumWithdrawal
+                                ? null
+                                : () => isPayout
+                                    ? _showPayoutSheet(context, state, balance)
+                                    : _showTopUpSheet(context, state),
                           ),
                         ),
                       ],
@@ -118,7 +123,7 @@ class WalletScreen extends StatelessWidget {
             ),
           ),
           Text(
-            '${positive ? '+' : '-'}₱${t.amount}',
+            '${positive ? '+' : '-'}${Money.format(t.amount)}',
             style: TextStyle(
               fontWeight: FontWeight.w800,
               color: positive ? AppColors.secondaryLight : AppColors.text,
@@ -149,11 +154,11 @@ class WalletScreen extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: amounts
-                  .map((a) => SbChip('₱$a', onTap: () {
+                  .map((a) => SbChip(Money.format(a), onTap: () {
                         Navigator.pop(context);
                         state.topUpPassengerWallet(a, 'GCash');
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('₱$a added to your wallet (simulated)')),
+                          SnackBar(content: Text('${Money.format(a)} added to your wallet (simulated)')),
                         );
                       }))
                   .toList(),
@@ -166,6 +171,9 @@ class WalletScreen extends StatelessWidget {
 
   void _showPayoutSheet(BuildContext context, AppState state, int balance) {
     final amounts = {500, 1000, 2000, balance};
+    // A double tap can land before the sheet's pop is painted, so the first
+    // request latches and the second tap is ignored.
+    var submitting = false;
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.panel,
@@ -180,22 +188,29 @@ class WalletScreen extends StatelessWidget {
           children: [
             const Text('Cash out to GCash', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
             const SizedBox(height: 4),
-            Text('Available: ₱$balance', style: const TextStyle(color: AppColors.muted, fontSize: 12)),
+            Text('Available: ${Money.format(balance)}', style: const TextStyle(color: AppColors.muted, fontSize: 12)),
             const SizedBox(height: 14),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: amounts
-                  .where((a) => a > 0 && a <= balance)
-                  .map((a) => SbChip('₱$a', onTap: () {
+                  // Rider and owner payouts share the configured minimum.
+                  .where((a) =>
+                      a > 0 &&
+                      a <= balance &&
+                      a >= state.minimumWithdrawal)
+                  .map((a) => SbChip(Money.format(a), onTap: () {
+                        if (submitting) return;
+                        submitting = true;
                         Navigator.pop(context);
-                        if (isOwner) {
-                          state.requestOwnerPayout(a, 'GCash');
-                        } else {
-                          state.requestRiderPayout(a, 'GCash');
-                        }
+                        final requested = isOwner
+                            ? state.requestOwnerPayout(a, 'GCash')
+                            : state.requestPayout(a, 'GCash');
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Payout of ₱$a requested (simulated)')),
+                          SnackBar(
+                              content: Text(requested
+                                  ? 'Payout of ${Money.format(a)} requested (simulated)'
+                                  : 'Minimum payout is ${Money.format(state.minimumWithdrawal)}')),
                         );
                       }))
                   .toList(),

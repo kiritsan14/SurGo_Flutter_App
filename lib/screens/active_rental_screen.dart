@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../data/db_service.dart';
 import '../data/db_models.dart';
+import '../services/money.dart';
 import '../state/app_state.dart';
+import '../state/rental_status.dart';
 import '../theme/app_colors.dart';
 import '../widgets/common.dart';
 import '../widgets/surgo_map.dart';
@@ -37,13 +39,15 @@ class ActiveRentalScreen extends StatelessWidget {
           }
 
           final isOwnerMode = ownerArg != null;
+          // "Pending" covers both requested and awaiting-owner: from the renter's
+          // side those are the same thing, that the owner has not said yes yet.
           final isPending = isOwnerMode
-              ? ownerArg.status == 'Pending'
-              : passengerBooking!.status == 'Pending';
-
-          final statusString =
-              isOwnerMode ? ownerArg.status : passengerBooking!.status;
-          const iconData = Icons.electric_rickshaw;
+              ? ownerArg.status.isPending
+              : passengerBooking!.status.isPending;
+          final status = isOwnerMode
+              ? ownerArg.status
+              : passengerBooking!.status;
+      const iconData = Icons.electric_rickshaw;
 
           final vehicleName = isOwnerMode
               ? ownerArg.vehicleName
@@ -167,7 +171,7 @@ class ActiveRentalScreen extends StatelessWidget {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  SbTag(statusString, secondary: !isPending),
+                                  SbTag(status.shortLabel, secondary: !isPending),
                                   Text(
                                       isOwnerMode
                                           ? 'Vehicle'
@@ -220,11 +224,11 @@ class ActiveRentalScreen extends StatelessWidget {
                                   Text(
                                       isOwnerMode
                                           ? 'Total price'
-                                          : '${passengerBooking!.days} day${passengerBooking!.days > 1 ? 's' : ''} total',
+                                          : '${passengerBooking!.days} day${passengerBooking.days > 1 ? 's' : ''} total',
                                       style: const TextStyle(
                                           color: AppColors.muted,
                                           fontSize: 12)),
-                                  Text('₱$totalFare',
+                                  Text(Money.format(totalFare),
                                       style: const TextStyle(
                                           fontWeight: FontWeight.w800,
                                           color: AppColors.primaryLight,
@@ -259,18 +263,33 @@ class ActiveRentalScreen extends StatelessWidget {
                               Navigator.pop(context);
                             },
                           )
-                        else
+                        else if (status.advanceActionLabel != null)
                           SbPrimaryButton(
-                            label: 'Return Vehicle',
+                            label: status.advanceActionLabel!,
                             icon: Icons.check_circle_outline,
                             onPressed: () {
-                              state.completeActiveRental();
-                              Navigator.pop(context);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(
-                                        '$vehicleName returned — thanks for riding with SurGo!')),
-                              );
+                              // Settling is the only step that pays the owner,
+                              // and only from [RentalStatus.returned]. The
+                              // earlier steps move the booking along without
+                              // any money changing hands, so treating them all
+                              // as "return" would tell the renter the vehicle
+                              // was handed back while the guard had refused it.
+                              if (status == RentalStatus.returned) {
+                                state.completeActiveRental();
+                                Navigator.pop(context);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(
+                                          '$vehicleName returned — thanks for riding with SurGo!')),
+                                );
+                              } else {
+                                // accepted -> active is the pick-up, active ->
+                                // returned is bringing it back. One flag carries
+                                // both because [advanceRentalBooking] takes the
+                                // caller's intent, not the current status.
+                                state.advanceRentalBooking(
+                                    pickup: status == RentalStatus.accepted);
+                              }
                             },
                           ),
                       ],

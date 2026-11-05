@@ -9,7 +9,7 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1600),
@@ -107,7 +107,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 ),
               ),
               const SizedBox(height: 6),
-              const Text('Ride. Rent. Go.',
+              const Text('Ride. Rent. Errand.',
                   style: TextStyle(color: AppColors.muted, fontSize: 12.5)),
               const SizedBox(height: 48),
               SizedBox(

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/register_screen.dart';
+import 'screens/forgot_password_screen.dart';
 import 'screens/otp_screen.dart';
 import 'screens/passenger_shell.dart';
 import 'screens/booking_screen.dart';
 import 'screens/matching_screen.dart';
 import 'screens/live_trip_screen.dart';
+import 'screens/ride_chat_screen.dart';
 import 'screens/rental_list_screen.dart';
 import 'screens/rider_shell.dart';
 import 'screens/vehicle_owner_shell.dart';
@@ -15,6 +18,8 @@ import 'screens/passenger_map_screen.dart';
 import 'screens/rider_map_screen.dart';
 import 'screens/vehicle_owner_map_screen.dart';
 import 'screens/active_rental_screen.dart';
+import 'screens/pasuyo_screen.dart';
+import 'screens/pasuyo_post_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -40,22 +45,27 @@ class SurGoApp extends StatelessWidget {
       routes: {
         '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
+        '/register': (context) => const RegisterScreen(),
+        '/forgot-password': (context) => const ForgotPasswordScreen(),
         '/otp': (context) => const OtpScreen(),
         // The three dashboards are each a sliding-tab "shell" — Home,
         // Activity/Trips/Bookings, Wallet/Earnings, and Profile all live as
         // pages inside a PageView instead of being separate pushed routes.
         '/home': (context) => const PassengerShell(),
-        '/rider': (context) => const RiderShell(),
+        '/earner': (context) => const EarnerShell(),
         '/owner': (context) => const VehicleOwnerShell(),
         '/booking': (context) => const BookingScreen(),
+        '/pasuyo': (context) => const PasuyoScreen(),
+        '/pasuyo_post': (context) => const PasuyoPostScreen(),
         '/matching': (context) => const MatchingScreen(),
         '/livetrip': (context) => const LiveTripScreen(),
+        '/ride_chat': (context) => const RideChatScreen(),
         '/rental': (context) => const RentalListScreen(),
         '/profile': (context) => const ProfileScreen(embedded: false),
         '/rate': (context) => const RateTripScreen(),
         // Map V1 — one live-map view per role (passenger/rider/vehicle owner).
         '/map/passenger': (context) => const PassengerMapScreen(),
-        '/map/rider': (context) => const RiderMapScreen(),
+        '/map/earner': (context) => const EarnerMapScreen(),
         '/map/owner': (context) => const VehicleOwnerMapScreen(),
         '/active_rental': (context) => const ActiveRentalScreen(),
       },
